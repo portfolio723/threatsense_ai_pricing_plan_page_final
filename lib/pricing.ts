@@ -46,6 +46,40 @@ export const YEAR_OPTIONS: YearOption[] = [
   { years: 5, months: 60, label: '5 Years (40% off)', discountPercent: 40 },
 ];
 
+export interface AddOn {
+  id: string;
+  name: string;
+  shortDesc: string;
+  pricePerDeviceYear: number;
+}
+
+export const ADD_ONS: AddOn[] = [
+  {
+    id: 'siem-soar',
+    name: 'ThreatOps SIEM & SOAR',
+    shortDesc: 'Automated response playbooks & telemetry ingestion',
+    pricePerDeviceYear: 1200,
+  },
+  {
+    id: 'audit-enforcer',
+    name: 'Audit Trail Enforcer',
+    shortDesc: 'Immutable audit ledger logging for regulatory compliance',
+    pricePerDeviceYear: 800,
+  },
+  {
+    id: 'dprm-compliance',
+    name: 'DPRM Privacy Compliance',
+    shortDesc: 'Automated privacy mapping & compliance exports',
+    pricePerDeviceYear: 950,
+  },
+  {
+    id: 'mdr-soc',
+    name: 'Managed Detection & Response (MDR)',
+    shortDesc: '24/7 SOC monitoring and proactive incident mitigation',
+    pricePerDeviceYear: 1800,
+  },
+];
+
 export const PLANS: Plan[] = [
   {
     id: 'endpoint-security',

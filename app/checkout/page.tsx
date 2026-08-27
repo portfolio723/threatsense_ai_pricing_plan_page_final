@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, ArrowRight, Lock, CheckCircle2, XCircle, Loader2,
-  ShieldCheck, Download, FileText, HelpCircle,
+  ShieldCheck, Download, FileText, HelpCircle, Plus, Sparkles, SlidersHorizontal,
 } from 'lucide-react';
 import { Navbar } from '@/components/pricing/navbar';
 import { Button } from '@/components/ui/button';
@@ -13,44 +13,69 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { COMPANY_SIZES, getPlan, getPriceForDevices, formatINR, YEAR_OPTIONS, type PlanId } from '@/lib/pricing';
+import {
+  COMPANY_SIZES,
+  PLANS,
+  DEVICE_OPTIONS,
+  YEAR_OPTIONS,
+  ADD_ONS,
+  getPlan,
+  getPriceForDevices,
+  formatINR,
+  type PlanId,
+  type AddOn,
+} from '@/lib/pricing';
 
 type Step = 'account' | 'billing' | 'payment' | 'processing' | 'success' | 'failure';
 
 const TAX_RATE = 0.18;
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const planId = (searchParams.get('plan') || 'endpoint-security') as PlanId;
-  const devices = parseInt(searchParams.get('devices') || '5', 10);
-  const yearsParam = parseInt(searchParams.get('years') || '1', 10);
-  const plan = getPlan(planId);
+  const initialPlanId = (searchParams.get('plan') || 'endpoint-security') as PlanId;
+  const initialDevices = parseInt(searchParams.get('devices') || '5', 10);
+  const initialYears = parseInt(searchParams.get('years') || '1', 10);
+
+  const [selectedPlanId, setSelectedPlanId] = useState<PlanId>(initialPlanId);
+  const [devices, setDevices] = useState<number>(initialDevices);
+  const [selectedYears, setSelectedYears] = useState<number>(initialYears);
+  const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
 
   const [step, setStep] = useState<Step>('account');
   const [sameAsCompany, setSameAsCompany] = useState(false);
   const [country, setCountry] = useState('in');
 
-  if (!plan) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-          <p className="text-muted-foreground">Plan not found.</p>
-          <Link href="/"><Button className="mt-4">Back to Pricing</Button></Link>
-        </div>
-      </div>
-    );
-  }
+  const plan = getPlan(selectedPlanId) || PLANS[0];
+  const isEnterprise = plan.salesOnly;
 
   const baseAnnualPrice = getPriceForDevices(plan, devices) ?? 0;
-  const selectedDuration = YEAR_OPTIONS.find((d) => d.years === yearsParam) || YEAR_OPTIONS[0];
-  const undiscountedTotal = baseAnnualPrice * selectedDuration.years;
-  const discountAmount = Math.round(undiscountedTotal * (selectedDuration.discountPercent / 100));
-  const subtotal = undiscountedTotal - discountAmount;
+  const selectedDuration = YEAR_OPTIONS.find((d) => d.years === selectedYears) || YEAR_OPTIONS[0];
+  const undiscountedPlanTotal = baseAnnualPrice * selectedDuration.years;
+  const planDiscountAmount = Math.round(undiscountedPlanTotal * (selectedDuration.discountPercent / 100));
+  const planSubtotal = undiscountedPlanTotal - planDiscountAmount;
+
+  // Add-ons calculations
+  const activeAddOns: AddOn[] = ADD_ONS.filter((a) => selectedAddOnIds.includes(a.id));
+  const addOnsUndiscountedTotal = activeAddOns.reduce(
+    (sum, addon) => sum + addon.pricePerDeviceYear * devices * selectedDuration.years,
+    0
+  );
+  const addOnsDiscountAmount = Math.round(addOnsUndiscountedTotal * (selectedDuration.discountPercent / 100));
+  const addOnsSubtotal = addOnsUndiscountedTotal - addOnsDiscountAmount;
+
+  const subtotal = planSubtotal + addOnsSubtotal;
+  const totalDiscount = planDiscountAmount + addOnsDiscountAmount;
   const monthlyEquivalent = Math.round(subtotal / selectedDuration.months);
   const tax = Math.round(subtotal * TAX_RATE);
   const total = subtotal + tax;
   const orderId = `TS-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+  const toggleAddOn = (id: string) => {
+    setSelectedAddOnIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +126,7 @@ export default function CheckoutPage() {
         </div>
 
         {(step === 'account' || step === 'billing' || step === 'payment') && (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
             {/* Form area */}
             <div className="order-2 lg:order-1 space-y-6">
               {/* Plan & License Summary Card */}
@@ -109,13 +134,21 @@ export default function CheckoutPage() {
                 {/* Header with plan badge icon and pricing overview */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface border border-border/80 shrink-0">
-                      <ShieldCheck className="h-5 w-5 text-brand-orange" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface border border-border/80 shrink-0">
+                      <ShieldCheck className="h-6 w-6 text-brand-orange" />
                     </div>
                     <div>
-                      <h2 className="font-display text-lg font-semibold text-foreground">{plan.name}</h2>
-                      <p className="text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-display text-lg font-semibold text-foreground">{plan.name}</h2>
+                        {plan.recommended && (
+                          <span className="rounded-full bg-brand-purple/10 px-2 py-0.5 text-[10px] font-semibold text-brand-purple border border-brand-purple/20">
+                            Recommended
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {devices} Protected Devices · {selectedDuration.label}
+                        {activeAddOns.length > 0 && ` · +${activeAddOns.length} Add-on${activeAddOns.length > 1 ? 's' : ''}`}
                       </p>
                     </div>
                   </div>
@@ -319,46 +352,179 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* Order summary (sticky) */}
+            {/* Order summary (interactive & sticky) */}
             <div className="order-1 lg:order-2">
-              <div className="lg:sticky lg:top-24 rounded-2xl border border-border bg-card p-6">
-                <h3 className="font-display text-lg font-semibold">Order Summary</h3>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-orange/10">
-                    <ShieldCheck className="h-5 w-5 text-brand-orange" />
+              <div className="lg:sticky lg:top-24 space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display text-lg font-semibold flex items-center gap-2">
+                    <SlidersHorizontal className="h-4 w-4 text-brand-orange" />
+                    Order Summary &amp; Config
+                  </h3>
+                  <span className="text-xs text-muted-foreground font-medium">Instant Update</span>
+                </div>
+
+                {/* Tier Selection Dropdown */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="planTierSelect" className="text-xs font-semibold text-foreground">
+                    Selected Security Tier
+                  </Label>
+                  <Select
+                    value={selectedPlanId}
+                    onValueChange={(val) => setSelectedPlanId(val as PlanId)}
+                  >
+                    <SelectTrigger id="planTierSelect" className="h-10 rounded-xl border-border bg-surface text-sm font-medium">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PLANS.filter((p) => !p.salesOnly).map((p) => (
+                        <SelectItem key={p.id} value={p.id} className="text-sm">
+                          <span className="font-medium">{p.name}</span>
+                          {p.recommended && <span className="ml-1.5 text-xs text-brand-purple font-semibold">(Recommended)</span>}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Devices & Years Dropdowns in parallel */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="devicesSelect" className="text-xs font-semibold text-foreground">
+                      Devices
+                    </Label>
+                    <Select
+                      value={String(devices)}
+                      onValueChange={(val) => setDevices(Number(val))}
+                    >
+                      <SelectTrigger id="devicesSelect" className="h-10 rounded-xl border-border bg-surface text-sm font-medium">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DEVICE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={String(opt)} className="text-sm">
+                            {opt} devices
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div>
-                    <p className="font-semibold">{plan.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {devices} devices · {selectedDuration.years} Year{selectedDuration.years > 1 ? 's' : ''} ({selectedDuration.months} mo)
-                    </p>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="yearsSelect" className="text-xs font-semibold text-foreground">
+                      Duration
+                    </Label>
+                    <Select
+                      value={String(selectedYears)}
+                      onValueChange={(val) => setSelectedYears(Number(val))}
+                    >
+                      <SelectTrigger id="yearsSelect" className="h-10 rounded-xl border-border bg-surface text-sm font-medium">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {YEAR_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.years} value={String(opt.years)} className="text-sm">
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-3 border-t border-border pt-6 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal ({selectedDuration.years} yr)</span>
-                    <span className="font-medium tabular-nums">{formatINR(undiscountedTotal)}</span>
+                {/* Optional Add-Ons Section */}
+                <div className="space-y-2.5 rounded-xl border border-border/80 bg-surface/50 p-3.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-brand-orange" />
+                      Optional Add-Ons
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">Per device / yr</span>
                   </div>
-                  {discountAmount > 0 && (
+
+                  <div className="space-y-2 pt-1">
+                    {ADD_ONS.map((addon) => {
+                      const isChecked = selectedAddOnIds.includes(addon.id);
+                      const addonAnnualCost = addon.pricePerDeviceYear * devices;
+                      const addonTotalCost = addonAnnualCost * selectedDuration.years * (1 - selectedDuration.discountPercent / 100);
+
+                      return (
+                        <label
+                          key={addon.id}
+                          className={`flex items-start gap-2.5 rounded-lg border p-2.5 transition-colors cursor-pointer ${
+                            isChecked
+                              ? 'border-brand-orange/40 bg-brand-orange/5'
+                              : 'border-border/60 bg-card hover:border-border'
+                          }`}
+                        >
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={() => toggleAddOn(addon.id)}
+                            className="mt-0.5"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className="text-xs font-semibold text-foreground truncate">{addon.name}</p>
+                              <span className="text-xs font-semibold text-foreground whitespace-nowrap">
+                                +{formatINR(Math.round(addonTotalCost))}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                              {addon.shortDesc}
+                            </p>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Pricing Calculation Breakdown */}
+                <div className="space-y-2.5 border-t border-border pt-4 text-xs sm:text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      {plan.name} ({devices} dev · {selectedDuration.years} yr)
+                    </span>
+                    <span className="font-medium tabular-nums">{formatINR(undiscountedPlanTotal)}</span>
+                  </div>
+
+                  {planDiscountAmount > 0 && (
                     <div className="flex justify-between text-emerald-600">
-                      <span>Multi-Year Discount ({selectedDuration.discountPercent}%)</span>
-                      <span className="font-medium tabular-nums">-{formatINR(discountAmount)}</span>
+                      <span>Multi-Year Term Discount ({selectedDuration.discountPercent}%)</span>
+                      <span className="font-medium tabular-nums">-{formatINR(planDiscountAmount)}</span>
                     </div>
                   )}
+
+                  {activeAddOns.length > 0 && (
+                    <div className="flex justify-between text-foreground">
+                      <span className="text-muted-foreground">
+                        {activeAddOns.length} Add-on{activeAddOns.length > 1 ? 's' : ''} ({selectedDuration.years} yr)
+                      </span>
+                      <span className="font-medium tabular-nums">{formatINR(addOnsSubtotal)}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium tabular-nums">{formatINR(subtotal)}</span>
+                  </div>
+
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax (18% GST)</span>
                     <span className="font-medium tabular-nums">{formatINR(tax)}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border pt-3">
-                    <span className="font-semibold">Total</span>
-                    <span className="font-display text-xl font-semibold tabular-nums text-foreground">{formatINR(total)}</span>
+
+                  <div className="flex items-baseline justify-between border-t border-border pt-3">
+                    <div>
+                      <span className="font-semibold text-foreground text-base">Total Due</span>
+                      <p className="text-[11px] text-muted-foreground">{formatINR(monthlyEquivalent)}/mo equivalent</p>
+                    </div>
+                    <span className="font-display text-2xl font-bold tabular-nums text-foreground">{formatINR(total)}</span>
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center gap-2 rounded-lg bg-surface p-3 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 rounded-lg bg-surface p-3 text-xs text-muted-foreground">
                   <Lock className="h-3.5 w-3.5 shrink-0" />
-                  Secure encrypted payment
+                  Secure encrypted 256-bit payment
                 </div>
               </div>
             </div>
@@ -390,6 +556,9 @@ export default function CheckoutPage() {
                 <p><span className="text-muted-foreground">Plan:</span> {plan.name}</p>
                 <p><span className="text-muted-foreground">Duration:</span> {selectedDuration.label}</p>
                 <p><span className="text-muted-foreground">Devices:</span> {devices}</p>
+                {activeAddOns.length > 0 && (
+                  <p><span className="text-muted-foreground">Add-ons:</span> {activeAddOns.map((a) => a.name).join(', ')}</p>
+                )}
                 <p><span className="text-muted-foreground">Amount Paid:</span> {formatINR(total)}</p>
                 <p><span className="text-muted-foreground">Status:</span> Active</p>
               </div>
