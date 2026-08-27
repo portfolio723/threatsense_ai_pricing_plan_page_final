@@ -80,6 +80,7 @@
   }
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
   body {
     @apply bg-background text-foreground antialiased;
@@ -115,6 +116,13 @@
   .animate-price-roll {
     animation: price-roll 0.18s ease-out;
   }
+  .animate-word-reveal {
+    animation: word-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .animate-card-enter {
+    animation: card-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 
   .stagger-1 { animation-delay: 60ms; }
   .stagger-2 { animation-delay: 120ms; }
@@ -122,6 +130,8 @@
   .stagger-4 { animation-delay: 240ms; }
   .stagger-5 { animation-delay: 300ms; }
   .stagger-6 { animation-delay: 360ms; }
+  .stagger-7 { animation-delay: 420ms; }
+  .stagger-8 { animation-delay: 480ms; }
 
   .bg-grid {
     background-image:
@@ -135,6 +145,23 @@
   }
 }
 
+@keyframes word-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(115%) rotateX(-20deg);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 0.9;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+    filter: blur(0);
+  }
+}
+
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -143,6 +170,17 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes scale-in {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
@@ -150,4 +188,18 @@
 @keyframes price-roll {
   0% { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

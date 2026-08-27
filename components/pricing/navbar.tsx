@@ -14,6 +14,18 @@ interface NavbarProps {
 export function Navbar({ onContactSales }: NavbarProps) {
   const [open, setOpen] = useState(false);
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (window.location.pathname === '/' || window.location.pathname === '') {
+      e.preventDefault();
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.history.pushState(null, '', `/#${id}`);
+      }
+      setOpen(false);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -29,13 +41,25 @@ export function Navbar({ onContactSales }: NavbarProps) {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          <Link href="/#plans" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <Link
+            href="/#plans"
+            onClick={(e) => handleNavClick(e, 'plans')}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-brand-orange"
+          >
             Plans
           </Link>
-          <Link href="/#compare" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <Link
+            href="/#compare"
+            onClick={(e) => handleNavClick(e, 'compare')}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-brand-orange"
+          >
             Compare
           </Link>
-          <Link href="/#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <Link
+            href="/#faq"
+            onClick={(e) => handleNavClick(e, 'faq')}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-brand-orange"
+          >
             FAQ
           </Link>
         </nav>
@@ -44,7 +68,7 @@ export function Navbar({ onContactSales }: NavbarProps) {
           <Button
             size="sm"
             onClick={onContactSales}
-            className="bg-foreground text-background hover:bg-foreground/90"
+            className="bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 hover:shadow-sm"
           >
             Contact Us
           </Button>
@@ -61,13 +85,25 @@ export function Navbar({ onContactSales }: NavbarProps) {
 
       <div className={cn('border-t border-border/60 md:hidden', open ? 'block' : 'hidden')}>
         <nav className="flex flex-col gap-1 px-4 py-4">
-          <Link href="/#plans" className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted" onClick={() => setOpen(false)}>
+          <Link
+            href="/#plans"
+            className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-brand-orange"
+            onClick={(e) => handleNavClick(e, 'plans')}
+          >
             Plans
           </Link>
-          <Link href="/#compare" className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted" onClick={() => setOpen(false)}>
+          <Link
+            href="/#compare"
+            className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-brand-orange"
+            onClick={(e) => handleNavClick(e, 'compare')}
+          >
             Compare
           </Link>
-          <Link href="/#faq" className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted" onClick={() => setOpen(false)}>
+          <Link
+            href="/#faq"
+            className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-brand-orange"
+            onClick={(e) => handleNavClick(e, 'faq')}
+          >
             FAQ
           </Link>
           <Button

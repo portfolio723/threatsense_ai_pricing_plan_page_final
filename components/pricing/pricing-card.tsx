@@ -8,7 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-export function PricingCard({ plan, onContactSales }: { plan: Plan; onContactSales?: () => void }) {
+interface PricingCardProps {
+  plan: Plan;
+  onContactSales?: () => void;
+  index?: number;
+  isInView?: boolean;
+}
+
+export function PricingCard({ plan, onContactSales, index = 0, isInView = true }: PricingCardProps) {
   const { devices } = usePricing();
   const router = useRouter();
   const price = getPriceForDevices(plan, devices);
@@ -19,10 +26,10 @@ export function PricingCard({ plan, onContactSales }: { plan: Plan; onContactSal
 
   const accentClasses =
     plan.accent === 'purple'
-      ? 'border-brand-purple/50'
+      ? 'border-brand-purple/40 hover:border-brand-purple hover:shadow-brand-purple/15'
       : plan.accent === 'orange'
-      ? 'border-brand-orange/50'
-      : 'border-border';
+      ? 'border-brand-orange/40 hover:border-brand-orange hover:shadow-brand-orange/15'
+      : 'border-border hover:border-muted-foreground/30';
 
   const handleTrial = () => {
     const params = new URLSearchParams({ plan: plan.id, devices: String(devices) });
@@ -36,24 +43,33 @@ export function PricingCard({ plan, onContactSales }: { plan: Plan; onContactSal
 
   return (
     <div
+      style={{
+        transitionDelay: isInView ? `${160 + index * 120}ms` : '0ms',
+      }}
       className={cn(
-        'relative flex flex-col rounded-2xl border-2 bg-card p-6 transition-all duration-200 hover:-translate-y-0.5',
+        'group relative flex flex-col rounded-2xl border-2 bg-card p-6',
+        'transition-[opacity,transform,box-shadow,border-color] duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[transform,opacity]',
+        isInView
+          ? 'translate-y-0 opacity-100 scale-100'
+          : 'translate-y-8 opacity-0 scale-[0.97]',
+        'hover:-translate-y-1.5 hover:shadow-xl',
         plan.recommended
-          ? 'border-brand-purple shadow-lg shadow-brand-purple/10'
-          : accentClasses,
-        'hover:shadow-md'
+          ? 'border-brand-purple shadow-lg shadow-brand-purple/10 hover:shadow-brand-purple/20'
+          : accentClasses
       )}
     >
       {plan.recommended && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Badge className="bg-brand-purple px-3 py-1 text-white shadow-sm">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 transition-transform duration-300 group-hover:scale-105">
+          <Badge className="bg-brand-purple px-3 py-1 text-white shadow-sm font-semibold tracking-wide">
             <Star className="mr-1 h-3 w-3 fill-white" />
             RECOMMENDED
           </Badge>
         </div>
       )}
 
-      <h3 className="font-display text-xl font-semibold tracking-tight">{plan.name}</h3>
+      <h3 className="font-display text-xl font-semibold tracking-tight transition-colors duration-200 group-hover:text-brand-orange">
+        {plan.name}
+      </h3>
 
       <div className="my-6 border-t border-border" />
 
@@ -107,28 +123,14 @@ export function PricingCard({ plan, onContactSales }: { plan: Plan; onContactSal
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/cta:translate-x-0.5" />
           </Button>
         ) : (
-          <>
-            {plan.trialAvailable && (
-              <Button
-                onClick={handleTrial}
-                variant="outline"
-                className="group/cta w-full hover:border-brand-orange hover:text-brand-orange"
-              >
-                Start Free Trial
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/cta:translate-x-0.5" />
-              </Button>
-            )}
-            {plan.purchaseAvailable && (
-              <Button
-                onClick={handleBuy}
-                className="group/cta w-full bg-brand-orange text-white hover:bg-brand-orange-dark"
-              >
-                <span className="group-hover/cta:hidden">Buy Now</span>
-                <span className="hidden group-hover/cta:inline">Continue to Checkout</span>
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </>
+          <Button
+            onClick={handleBuy}
+            className="group/cta w-full bg-brand-orange text-white hover:bg-brand-orange-dark shadow-sm transition-all duration-200 hover:shadow-md"
+          >
+            <span className="group-hover/cta:hidden">Buy Now</span>
+            <span className="hidden group-hover/cta:inline">Continue to Checkout</span>
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/cta:translate-x-0.5" />
+          </Button>
         )}
       </div>
     </div>

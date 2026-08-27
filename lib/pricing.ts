@@ -1,5 +1,4 @@
 export type PlanId =
-  | 'tads-registration'
   | 'endpoint-security'
   | 'endpoint-browser'
   | 'complete-data-protection';
@@ -34,38 +33,12 @@ export const SALES_THRESHOLD = 250;
 
 export const PLANS: Plan[] = [
   {
-    id: 'tads-registration',
-    name: 'TADS Registration',
-    tagline: 'Start with essential protection',
-    description:
-      'For organizations beginning their ThreatSenseAI security journey.',
-    trialAvailable: true,
-    purchaseAvailable: true,
-    salesOnly: false,
-    accent: 'neutral',
-    deviceTiers: [
-      { devices: 5, price: 18000 },
-      { devices: 10, price: 32000 },
-      { devices: 25, price: 72000 },
-      { devices: 50, price: 135000 },
-      { devices: 100, price: 250000 },
-    ],
-    highlightCount: 5,
-    features: [
-      { label: 'TADS account registration', description: 'Provision your ThreatSenseAI account and initial tenant.' },
-      { label: 'Security policy setup', description: 'Configure baseline policies for your organization.' },
-      { label: 'Basic protection controls', description: 'Enable foundational device-level controls.' },
-      { label: 'ThreatSenseAI management access', description: 'Access the admin management console.' },
-      { label: 'Product onboarding', description: 'Guided onboarding for your first deployment.' },
-    ],
-  },
-  {
     id: 'endpoint-security',
     name: 'Endpoint Security',
     tagline: 'Protect every endpoint',
     description:
       'Essential endpoint controls to prevent unauthorized access, copying, and data leakage.',
-    trialAvailable: true,
+    trialAvailable: false,
     purchaseAvailable: true,
     salesOnly: false,
     accent: 'neutral',
@@ -78,7 +51,7 @@ export const PLANS: Plan[] = [
     ],
     highlightCount: 6,
     features: [
-      { label: 'Everything in TADS Registration' },
+      { label: 'TADS account registration & onboarding', description: 'Provision your ThreatSenseAI tenant and admin account.' },
       { label: 'Screenshot protection', description: 'Block unauthorized screen captures across managed apps.' },
       { label: 'USB control', description: 'Restrict and audit removable storage devices.' },
       { label: 'Print & export control', description: 'Prevent unauthorized printing and data export.' },
@@ -94,7 +67,7 @@ export const PLANS: Plan[] = [
     description:
       'Extend protection from employee devices into browser-based applications, AI tools, email, and cloud services.',
     recommended: true,
-    trialAvailable: true,
+    trialAvailable: false,
     purchaseAvailable: true,
     salesOnly: false,
     accent: 'purple',
@@ -140,97 +113,282 @@ export const PLANS: Plan[] = [
   },
 ];
 
+export type ComparisonValue = boolean | string;
+
 export interface ComparisonRow {
   category: string;
   label: string;
   description?: string;
-  values: [boolean, boolean, boolean, boolean];
+  values: [ComparisonValue, ComparisonValue, ComparisonValue];
 }
 
 export const COMPARISON_ROWS: ComparisonRow[] = [
+  // Platform & Management
   {
-    category: 'Foundation',
-    label: 'TADS Registration',
-    description: 'Provision your ThreatSenseAI account and tenant.',
-    values: [true, true, true, true],
+    category: 'Platform & Management',
+    label: 'Unified console',
+    description: 'Single centralized dashboard for all security policies and telemetry.',
+    values: [true, true, true],
   },
   {
-    category: 'Endpoint',
-    label: 'Endpoint Protection',
-    description: 'Core device-level threat prevention.',
-    values: [false, true, true, true],
+    category: 'Platform & Management',
+    label: 'Policy groups by user, device & department',
+    description: 'Granular policy assignment based on AD groups, organizational units, and device profiles.',
+    values: [true, true, true],
   },
   {
-    category: 'Endpoint',
-    label: 'Screenshot Protection',
-    description: 'Block unauthorized screen captures.',
-    values: [false, true, true, true],
+    category: 'Platform & Management',
+    label: 'Real-time alerts & incident feed',
+    description: 'Instant notification stream with actionable risk scoring on exfiltration attempts.',
+    values: [true, true, true],
   },
   {
-    category: 'Endpoint',
-    label: 'USB Control',
-    description: 'Restrict and audit removable storage.',
-    values: [false, true, true, true],
+    category: 'Platform & Management',
+    label: 'Audit-ready evidence & reports',
+    description: 'Forensic-grade audit logs and executive compliance reporting.',
+    values: [true, true, true],
   },
   {
-    category: 'Endpoint',
-    label: 'Print & Export Control',
-    description: 'Prevent unauthorized printing and export.',
-    values: [false, true, true, true],
+    category: 'Platform & Management',
+    label: 'On-prem, private cloud or SaaS deployment',
+    description: 'Flexible deployment topology tailored to your enterprise hosting requirements.',
+    values: [true, true, true],
+  },
+
+  // Endpoint Data Protection
+  {
+    category: 'Endpoint Data Protection',
+    label: 'Screenshot & snipping tool blocking',
+    description: 'Proactively block screen captures and snipping utilities across protected apps.',
+    values: [true, true, true],
   },
   {
-    category: 'Endpoint',
-    label: 'Watermarking',
-    description: 'User-identifiable watermarks on screen and documents.',
-    values: [false, true, true, true],
+    category: 'Endpoint Data Protection',
+    label: 'Application blocking & allowlisting',
+    description: 'Control process executions and prevent unapproved software from running.',
+    values: [true, true, true],
   },
   {
-    category: 'Endpoint',
-    label: 'Anti-Tampering',
-    description: 'Detect and block agent disable attempts.',
-    values: [false, true, true, true],
+    category: 'Endpoint Data Protection',
+    label: 'Camera & microphone blocking',
+    description: 'Restrict unauthorized peripheral recording hardware in sensitive workspaces.',
+    values: [true, true, true],
   },
   {
-    category: 'Browser',
-    label: 'Browser Protection',
-    description: 'Safeguard data in managed browser sessions.',
-    values: [false, false, true, true],
+    category: 'Endpoint Data Protection',
+    label: 'Screen & window sharing blocking',
+    description: 'Prevent leakage during Zoom, Teams, Google Meet, and Webex sessions.',
+    values: [true, true, true],
   },
   {
-    category: 'Browser',
-    label: 'AI Tool Protection',
-    description: 'Govern AI assistants accessing company data.',
-    values: [false, false, true, true],
+    category: 'Endpoint Data Protection',
+    label: 'USB & removable media control',
+    description: 'Full read/write permissions, encryption enforcement, and activity auditing for USB drives.',
+    values: [true, true, true],
   },
   {
-    category: 'Browser',
-    label: 'Clipboard Protection',
-    description: 'Restrict copy/paste across trust boundaries.',
-    values: [false, false, true, true],
+    category: 'Endpoint Data Protection',
+    label: 'Portable device control (MTP, phones, external drives)',
+    description: 'Block or restrict smartphone media transfers, cameras, and external drives.',
+    values: [true, true, true],
   },
   {
-    category: 'Browser',
-    label: 'File Upload Protection',
-    description: 'Block unauthorized uploads to web services.',
-    values: [false, false, true, true],
+    category: 'Endpoint Data Protection',
+    label: 'Dynamic watermark on applications',
+    description: 'Overlay custom user-identifiable watermarks across sensitive application windows.',
+    values: [true, true, true],
   },
   {
-    category: 'SAP',
-    label: 'SAP Data Protection',
-    description: 'Detect and block leakage of sensitive SAP data.',
-    values: [false, false, false, true],
+    category: 'Endpoint Data Protection',
+    label: 'File sharing & transfer blocking',
+    description: 'Intercept and block unauthorized lateral file transfers over local and remote channels.',
+    values: [true, true, true],
   },
   {
-    category: 'SAP',
-    label: 'SAP DLP Controls',
-    description: 'Data loss prevention controls for SAP environments.',
-    values: [false, false, false, true],
+    category: 'Endpoint Data Protection',
+    label: 'Copy, paste & clipboard control',
+    description: 'Prevent data copy from enterprise apps into personal or unmonitored contexts.',
+    values: [true, true, true],
   },
   {
-    category: 'SAP',
-    label: 'Advanced SAP Policies',
-    description: 'Role-based and context-aware SAP policies.',
-    values: [false, false, false, true],
+    category: 'Endpoint Data Protection',
+    label: 'Print & virtual printer control',
+    description: 'Restrict physical printing, PDF export printers, and unauthorized print jobs.',
+    values: [true, true, true],
+  },
+  {
+    category: 'Endpoint Data Protection',
+    label: 'Sensitive download monitoring',
+    description: 'Track and evaluate inbound files and local downloads for proprietary content.',
+    values: [true, true, true],
+  },
+  {
+    category: 'Endpoint Data Protection',
+    label: 'URL & website restrictions',
+    description: 'Enforce domain categories, block phishing domains, and restrict high-risk websites.',
+    values: [true, true, true],
+  },
+  {
+    category: 'Endpoint Data Protection',
+    label: 'Remote lock & wipe',
+    description: 'Remotely isolate compromised devices and wipe enterprise caches upon incident trigger.',
+    values: [true, true, true],
+  },
+  {
+    category: 'Endpoint Data Protection',
+    label: 'Offline policy enforcement',
+    description: 'Continuous local enforcement when devices are disconnected from the network.',
+    values: [true, true, true],
+  },
+
+  // Browser Data Protection
+  {
+    category: 'Browser Data Protection',
+    label: 'Agentless browser protection',
+    description: 'Seamless in-browser session isolation and zero-install policy enforcement.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'PII detection in browser sessions',
+    description: 'Real-time contextual inspection for SSNs, credit cards, credentials, and custom regex.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'Masking in files, images & ZIP archives',
+    description: 'Automated obfuscation and redaction of sensitive identifiers in transit.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'GenAI prompt & upload controls',
+    description: 'Filter prompts and block file uploads into ChatGPT, Claude, Copilot, and Gemini.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'Webmail controls (Gmail, Outlook Web)',
+    description: 'Inspect attachments, recipient domains, and body text on webmail interfaces.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'Personal cloud upload controls',
+    description: 'Prevent data exfiltration to personal Google Drive, Dropbox, Box, and OneDrive.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'Browser screenshot activity detection',
+    description: 'Detect extension-based and in-page screenshot capture tools in browser tabs.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'Browser copy, paste & print control',
+    description: 'Block web clipboard transfers and disable browser print dialogs on SaaS pages.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'URL Blocking',
+    description: 'Proactively deny access to unauthorized or untrusted web destinations.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'URL Redirect',
+    description: 'Safely steer users away from risky pages to company-approved alternatives.',
+    values: [false, true, true],
+  },
+  {
+    category: 'Browser Data Protection',
+    label: 'Shadow SaaS visibility',
+    description: 'Identify unsanctioned cloud services and shadow IT tools in use across the team.',
+    values: [false, true, true],
+  },
+
+  // SAP Data Leak Prevention
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'SAP transaction & table context awareness',
+    description: 'Deep visibility into SAP GUI, Fiori, and web transactions with T-code awareness.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Sensitive table & field classification',
+    description: 'Fine-grained policy classification for confidential tables, fields, and queries.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Screenshot & snipping block by table sensitivity',
+    description: 'Dynamic screen capture blocking triggered on confidential SAP table views.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Print blocking on sensitive SAP data',
+    description: 'Block SAP spooling and local printing for classified reports and ledgers.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Download & export blocking',
+    description: 'Prevent export of SAP data to Excel, CSV, local text files, and clipboards.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Screen sharing blocked on sensitive SAP screens',
+    description: 'Automatically black out SAP windows during video calls and collaborative sessions.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Copy & paste blocked on sensitive SAP screens',
+    description: 'Disable copying sensitive SAP values into external applications or text editors.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'Dynamic moving watermark on SAP screens',
+    description: 'Real-time floating watermark displaying user identity and timestamp on SAP interfaces.',
+    values: [false, false, true],
+  },
+  {
+    category: 'SAP Data Leak Prevention',
+    label: 'SAP access & violation audit trail',
+    description: 'Comprehensive forensic record of SAP data access events and violation attempts.',
+    values: [false, false, true],
+  },
+
+  // Extend the Platform (Add-ons)
+  {
+    category: 'Extend the Platform (Add-ons)',
+    label: 'ThreatOps SIEM & SOAR',
+    description: 'Enterprise SIEM ingestion, automated response playbooks, and security orchestration.',
+    values: ['Add-on', 'Add-on', 'Add-on'],
+  },
+  {
+    category: 'Extend the Platform (Add-ons)',
+    label: 'Audit Trail Enforcer',
+    description: 'Immutable ledger logging for regulatory compliance and non-repudiation.',
+    values: ['Add-on', 'Add-on', 'Add-on'],
+  },
+  {
+    category: 'Extend the Platform (Add-ons)',
+    label: 'DPRM privacy compliance',
+    description: 'Automated data protection and privacy compliance reporting and mapping.',
+    values: ['Add-on', 'Add-on', 'Add-on'],
+  },
+  {
+    category: 'Extend the Platform (Add-ons)',
+    label: 'Managed detection & response',
+    description: '24/7 SOC monitoring and proactive incident response by ThreatSenseAI analysts.',
+    values: ['Add-on', 'Add-on', 'Add-on'],
   },
 ];
 
@@ -256,7 +414,7 @@ export const FAQS = [
     a: 'Contact our sales team for a tailored deployment and pricing designed for your scale.',
   },
   {
-    q: 'Does the fourth plan support SAP-specific data protection?',
+    q: 'Does the Complete Data Protection plan support SAP-specific data protection?',
     a: 'Yes. The Complete Data Protection tier adds SAP data leak prevention controls and role-based policies.',
   },
   {

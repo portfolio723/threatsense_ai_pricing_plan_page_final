@@ -20,7 +20,7 @@ export default function Home() {
       <div className="min-h-screen bg-background">
         <Navbar onContactSales={() => setSalesOpen(true)} />
         <main>
-          <PricingHero />
+          <PricingHero onContactSales={() => setSalesOpen(true)} />
           <PricingGrid onContactSales={() => setSalesOpen(true)} />
           <FeatureComparison />
           <ValueCards />

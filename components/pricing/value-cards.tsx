@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useInView } from '@/hooks/use-in-view';
+import { cn } from '@/lib/utils';
 import {
   Lightbulb,
   UserRoundSearch,
@@ -50,10 +53,36 @@ const VALUES: Value[] = [
 ];
 
 export function ValueCards() {
+  const [scrollY, setScrollY] = useState(0);
+  const { ref, isInView } = useInView<HTMLDivElement>({ threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <section className="bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div className="mx-auto max-w-3xl text-center">
+    <section className="relative overflow-hidden bg-background">
+      {/* Subtle Parallax Background Orbs */}
+      <div
+        className="pointer-events-none absolute -left-20 top-1/3 h-[380px] w-[380px] rounded-full bg-brand-orange/5 blur-[100px] will-change-transform"
+        style={{ transform: `translateY(${(scrollY - 1200) * 0.12}px)` }}
+      />
+      <div
+        className="pointer-events-none absolute -right-20 bottom-1/4 h-[350px] w-[350px] rounded-full bg-brand-purple/5 blur-[100px] will-change-transform"
+        style={{ transform: `translateY(${-(scrollY - 1500) * 0.1}px)` }}
+      />
+
+      <div ref={ref} className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div
+          className={cn(
+            'mx-auto max-w-3xl text-center transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            isInView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+          )}
+        >
           <p className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
             <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Our values
@@ -67,13 +96,23 @@ export function ValueCards() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {VALUES.map((value) => {
+          {VALUES.map((value, index) => {
             const Icon = value.icon;
             return (
               <article
                 key={value.title}
                 tabIndex={0}
-                className="group relative min-h-[230px] overflow-hidden rounded-xl bg-surface px-7 py-8 outline-none transition-all duration-300 hover:shadow-lg hover:shadow-brand-orange/10 focus-visible:ring-2 focus-visible:ring-brand-orange"
+                style={{
+                  transitionDelay: isInView ? `${140 + index * 90}ms` : '0ms',
+                }}
+                className={cn(
+                  'group relative min-h-[230px] overflow-hidden rounded-xl bg-surface px-7 py-8 outline-none',
+                  'transition-[opacity,transform,box-shadow,border-color] duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[transform,opacity]',
+                  isInView
+                    ? 'translate-y-0 opacity-100 scale-100'
+                    : 'translate-y-8 opacity-0 scale-[0.97]',
+                  'hover:shadow-lg hover:shadow-brand-orange/10 focus-visible:ring-2 focus-visible:ring-brand-orange'
+                )}
               >
                 <Icon className="h-9 w-9 stroke-[1.5] text-brand-orange transition-transform duration-300 group-hover:scale-110" />
                 <div className="absolute inset-x-7 bottom-7 transition-transform duration-300 group-hover:-translate-y-12 group-focus-visible:-translate-y-12">

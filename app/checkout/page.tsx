@@ -17,6 +17,20 @@ import { COMPANY_SIZES, getPlan, getPriceForDevices, formatINR, type PlanId } fr
 
 type Step = 'account' | 'billing' | 'payment' | 'processing' | 'success' | 'failure';
 
+interface DurationOption {
+  years: number;
+  months: number;
+  label: string;
+  discountPercent: number;
+}
+
+const DURATION_OPTIONS: DurationOption[] = [
+  { years: 1, months: 12, label: '12 months (1 Year)', discountPercent: 0 },
+  { years: 2, months: 24, label: '24 months (2 Years)', discountPercent: 15 },
+  { years: 3, months: 36, label: '36 months (3 Years)', discountPercent: 25 },
+  { years: 4, months: 48, label: '48 months (4 Years)', discountPercent: 35 },
+];
+
 const TAX_RATE = 0.18;
 
 export default function CheckoutPage() {
@@ -26,6 +40,7 @@ export default function CheckoutPage() {
   const plan = getPlan(planId);
 
   const [step, setStep] = useState<Step>('account');
+  const [selectedYears, setSelectedYears] = useState<number>(3);
   const [sameAsCompany, setSameAsCompany] = useState(false);
   const [country, setCountry] = useState('in');
 
@@ -41,9 +56,15 @@ export default function CheckoutPage() {
     );
   }
 
-  const price = getPriceForDevices(plan, devices) ?? 0;
-  const tax = Math.round(price * TAX_RATE);
-  const total = price + tax;
+  const baseAnnualPrice = getPriceForDevices(plan, devices) ?? 0;
+  const selectedDuration = DURATION_OPTIONS.find((d) => d.years === selectedYears) || DURATION_OPTIONS[0];
+  const undiscountedTotal = baseAnnualPrice * selectedDuration.years;
+  const discountAmount = Math.round(undiscountedTotal * (selectedDuration.discountPercent / 100));
+  const subtotal = undiscountedTotal - discountAmount;
+  const monthlyEquivalent = Math.round(subtotal / selectedDuration.months);
+  const originalMonthlyEquivalent = Math.round(baseAnnualPrice / 12);
+  const tax = Math.round(subtotal * TAX_RATE);
+  const total = subtotal + tax;
   const orderId = `TS-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
   const handlePay = (e: React.FormEvent) => {
@@ -97,7 +118,83 @@ export default function CheckoutPage() {
         {(step === 'account' || step === 'billing' || step === 'payment') && (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
             {/* Form area */}
-            <div className="order-2 lg:order-1">
+            <div className="order-2 lg:order-1 space-y-6">
+              {/* Duration / Years Selection Card (only on checkout) */}
+              <div className="animate-fade-up space-y-5 rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-xs">
+                {/* Header with plan badge icon */}
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface border border-border/80">
+                    <ShieldCheck className="h-5 w-5 text-brand-orange" />
+                  </div>
+                  <div>
+                    <h2 className="font-display text-lg font-semibold text-foreground">{plan.name}</h2>
+                    <p className="text-xs text-muted-foreground">{devices} Protected Devices · Dedicated Enterprise Console</p>
+                  </div>
+                </div>
+
+                {/* Period Selector and Pricing */}
+                <div className="space-y-2 pt-1">
+                  <Label htmlFor="periodSelect" className="text-sm font-semibold text-foreground">Period</Label>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="w-full sm:max-w-[270px]">
+                      <Select
+                        value={String(selectedYears)}
+                        onValueChange={(val) => setSelectedYears(Number(val))}
+                      >
+                        <SelectTrigger id="periodSelect" className="h-11 rounded-xl border-border bg-background px-3.5 text-sm font-medium">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DURATION_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.years} value={String(opt.years)} className="text-sm">
+                              <span className="font-medium">{opt.label}</span>
+                              {opt.discountPercent > 0 && (
+                                <span className="ml-2 text-xs font-semibold text-emerald-600">
+                                  ({opt.discountPercent}% off)
+                                </span>
+                              )}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3.5">
+                      {discountAmount > 0 && (
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
+                          Save {formatINR(discountAmount)}
+                        </span>
+                      )}
+                      <div className="text-right">
+                        <div className="font-display text-xl font-bold tracking-tight text-foreground">
+                          {formatINR(monthlyEquivalent)}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                        </div>
+                        {discountAmount > 0 && (
+                          <div className="text-xs text-muted-foreground line-through">
+                            {formatINR(originalMonthlyEquivalent)}/mo
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="pt-1 text-xs text-muted-foreground">
+                    {selectedDuration.years > 1
+                      ? `Renews after ${selectedDuration.months} months at ${formatINR(monthlyEquivalent)}/mo for 12 months. Cancel anytime.`
+                      : 'Renews annually at standard rate. Cancel or change plan anytime.'}
+                  </p>
+                </div>
+
+                <div className="border-t border-border/70" />
+
+                {/* Inclusion reassurance */}
+                <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>
+                    Your {devices} device deployment includes <strong className="font-semibold text-foreground">FREE 24/7 Security Incident Response</strong> &amp; Threat Telemetry SLA
+                  </span>
+                </div>
+              </div>
+
               {step === 'account' && (
                 <div className="animate-fade-up space-y-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
                   <div>
@@ -279,22 +376,30 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <p className="font-semibold">{plan.name}</p>
-                    <p className="text-sm text-muted-foreground">{devices} devices · Annual</p>
+                    <p className="text-sm text-muted-foreground">
+                      {devices} devices · {selectedDuration.years} Year{selectedDuration.years > 1 ? 's' : ''} ({selectedDuration.months} mo)
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-6 space-y-3 border-t border-border pt-6 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium tabular-nums">{formatINR(price)}</span>
+                    <span className="text-muted-foreground">Subtotal ({selectedDuration.years} yr)</span>
+                    <span className="font-medium tabular-nums">{formatINR(undiscountedTotal)}</span>
                   </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-600">
+                      <span>Multi-Year Discount ({selectedDuration.discountPercent}%)</span>
+                      <span className="font-medium tabular-nums">-{formatINR(discountAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax (18% GST)</span>
                     <span className="font-medium tabular-nums">{formatINR(tax)}</span>
                   </div>
                   <div className="flex justify-between border-t border-border pt-3">
                     <span className="font-semibold">Total</span>
-                    <span className="font-display text-xl font-semibold tabular-nums">{formatINR(total)}</span>
+                    <span className="font-display text-xl font-semibold tabular-nums text-foreground">{formatINR(total)}</span>
                   </div>
                 </div>
 
@@ -320,28 +425,29 @@ export default function CheckoutPage() {
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-success/10">
               <CheckCircle2 className="h-10 w-10 text-success" />
             </div>
-            <h1 className="mt-6 font-display text-3xl font-semibold tracking-tight">You&apos;re Protected</h1>
-            <p className="mt-3 text-muted-foreground">
-              Your ThreatSenseAI plan has been successfully activated.
+            <h2 className="mt-6 font-display text-2xl font-semibold tracking-tight">Payment Successful</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Thank you for purchasing {plan.name} ({selectedDuration.years} Year license). Your order ID is{' '}
+              <span className="font-mono font-semibold text-foreground">{orderId}</span>.
             </p>
-            <div className="mx-auto mt-6 max-w-sm rounded-xl border border-border bg-surface p-6 text-left">
-              <p className="font-display text-lg font-semibold">{plan.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{devices} devices</p>
-              <p className="text-sm text-muted-foreground">Annual plan</p>
-              <p className="mt-2 text-sm font-medium">Order #{orderId}</p>
+
+            <div className="mt-8 rounded-xl border border-border bg-surface p-4 text-left">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">License Details</p>
+              <div className="mt-2 space-y-1 text-sm">
+                <p><span className="text-muted-foreground">Plan:</span> {plan.name}</p>
+                <p><span className="text-muted-foreground">Duration:</span> {selectedDuration.label}</p>
+                <p><span className="text-muted-foreground">Devices:</span> {devices}</p>
+                <p><span className="text-muted-foreground">Amount Paid:</span> {formatINR(total)}</p>
+                <p><span className="text-muted-foreground">Status:</span> Active</p>
+              </div>
             </div>
+
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button size="lg" className="bg-brand-orange text-white hover:bg-brand-orange-dark">
-                Go to Dashboard
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" /> Download Agent Installer
               </Button>
               <Button size="lg" variant="outline">
-                <Download className="mr-2 h-4 w-4" />
-                Download Invoice
-              </Button>
-              <Button size="lg" variant="outline">
-                <FileText className="mr-2 h-4 w-4" />
-                View Setup Guide
+                <FileText className="mr-2 h-4 w-4" /> Download Invoice
               </Button>
             </div>
           </div>
