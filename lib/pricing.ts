@@ -31,6 +31,21 @@ export interface Plan {
 export const DEVICE_OPTIONS = [5, 10, 25, 50, 100, 250] as const;
 export const SALES_THRESHOLD = 250;
 
+export interface YearOption {
+  years: number;
+  months: number;
+  label: string;
+  discountPercent: number;
+}
+
+export const YEAR_OPTIONS: YearOption[] = [
+  { years: 1, months: 12, label: '1 Year', discountPercent: 0 },
+  { years: 2, months: 24, label: '2 Years (15% off)', discountPercent: 15 },
+  { years: 3, months: 36, label: '3 Years (25% off)', discountPercent: 25 },
+  { years: 4, months: 48, label: '4 Years (35% off)', discountPercent: 35 },
+  { years: 5, months: 60, label: '5 Years (40% off)', discountPercent: 40 },
+];
+
 export const PLANS: Plan[] = [
   {
     id: 'endpoint-security',
@@ -473,6 +488,30 @@ export function getPriceForDevices(plan: Plan, devices: number): number | null {
     return Math.round(lower.price + ratio * (upper.price - lower.price));
   }
   return lower ? lower.price : null;
+}
+
+export function getPriceCalculation(plan: Plan, devices: number, years: number = 1) {
+  const baseAnnualPrice = getPriceForDevices(plan, devices);
+  if (baseAnnualPrice === null) return null;
+
+  const yearOption = YEAR_OPTIONS.find((y) => y.years === years) || YEAR_OPTIONS[0];
+  const undiscountedTotal = baseAnnualPrice * yearOption.years;
+  const discountAmount = Math.round(undiscountedTotal * (yearOption.discountPercent / 100));
+  const subtotal = undiscountedTotal - discountAmount;
+  const annualEquivalent = Math.round(subtotal / yearOption.years);
+  const monthlyEquivalent = Math.round(subtotal / yearOption.months);
+
+  return {
+    baseAnnualPrice,
+    years: yearOption.years,
+    months: yearOption.months,
+    discountPercent: yearOption.discountPercent,
+    undiscountedTotal,
+    discountAmount,
+    subtotal,
+    annualEquivalent,
+    monthlyEquivalent,
+  };
 }
 
 export function formatINR(amount: number): string {

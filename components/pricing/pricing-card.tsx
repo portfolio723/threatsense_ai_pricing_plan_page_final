@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Star, ShieldCheck } from 'lucide-react';
-import { Plan, getPriceForDevices, formatINR, SALES_THRESHOLD } from '@/lib/pricing';
+import { Check, ArrowRight, Star, ShieldCheck, Sparkles } from 'lucide-react';
+import { Plan, getPriceCalculation, formatINR, SALES_THRESHOLD } from '@/lib/pricing';
 import { usePricing } from '@/lib/pricing-context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,10 @@ interface PricingCardProps {
 }
 
 export function PricingCard({ plan, onContactSales, index = 0, isInView = true }: PricingCardProps) {
-  const { devices } = usePricing();
+  const { devices, years } = usePricing();
   const router = useRouter();
-  const price = getPriceForDevices(plan, devices);
-  const isSales = plan.salesOnly || devices >= SALES_THRESHOLD || price === null;
+  const priceCalc = getPriceCalculation(plan, devices, years);
+  const isSales = plan.salesOnly || devices >= SALES_THRESHOLD || priceCalc === null;
 
   const highlights = plan.features.slice(0, plan.highlightCount);
   const remaining = plan.features.length - plan.highlightCount;
@@ -31,13 +31,12 @@ export function PricingCard({ plan, onContactSales, index = 0, isInView = true }
       ? 'border-brand-orange/40 hover:border-brand-orange hover:shadow-brand-orange/15'
       : 'border-border hover:border-muted-foreground/30';
 
-  const handleTrial = () => {
-    const params = new URLSearchParams({ plan: plan.id, devices: String(devices) });
-    router.push(`/trial?${params.toString()}`);
-  };
-
   const handleBuy = () => {
-    const params = new URLSearchParams({ plan: plan.id, devices: String(devices) });
+    const params = new URLSearchParams({
+      plan: plan.id,
+      devices: String(devices),
+      years: String(years),
+    });
     router.push(`/checkout?${params.toString()}`);
   };
 
@@ -74,7 +73,7 @@ export function PricingCard({ plan, onContactSales, index = 0, isInView = true }
       <div className="my-6 border-t border-border" />
 
       <div className="mb-6">
-        {isSales ? (
+        {isSales || !priceCalc ? (
           <div>
             <p className="font-display text-2xl font-semibold">Custom pricing</p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -85,15 +84,39 @@ export function PricingCard({ plan, onContactSales, index = 0, isInView = true }
           </div>
         ) : (
           <div>
-            <p className="text-sm text-muted-foreground">From</p>
-            <div className="flex items-baseline gap-1">
-              <span className="font-display text-3xl font-semibold tabular-nums">
-                {formatINR(price ?? 0)}
-              </span>
-              <span className="text-sm text-muted-foreground">/year</span>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {years === 1 ? 'Annual License' : `${years}-Year License`}
+              </p>
+              {priceCalc.discountPercent > 0 && (
+                <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 border border-emerald-500/20">
+                  {priceCalc.discountPercent}% Off
+                </span>
+              )}
             </div>
+
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="font-display text-3xl font-semibold tabular-nums text-foreground">
+                {formatINR(priceCalc.subtotal)}
+              </span>
+              <span className="text-xs text-muted-foreground font-normal">
+                {years === 1 ? '/year' : `total for ${years} yrs`}
+              </span>
+            </div>
+
+            {priceCalc.discountAmount > 0 ? (
+              <div className="mt-1 flex items-center gap-1.5 text-xs">
+                <span className="font-medium text-emerald-600">
+                  Save {formatINR(priceCalc.discountAmount)}
+                </span>
+                <span className="text-muted-foreground line-through">
+                  {formatINR(priceCalc.undiscountedTotal)}
+                </span>
+              </div>
+            ) : null}
+
             <p className="mt-1 text-xs text-muted-foreground">
-              {devices} devices · annual plan
+              {devices} devices {years > 1 ? `· ${formatINR(priceCalc.annualEquivalent)}/yr equivalent` : '· billed annually'}
             </p>
           </div>
         )}

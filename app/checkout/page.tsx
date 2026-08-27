@@ -13,23 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { COMPANY_SIZES, getPlan, getPriceForDevices, formatINR, type PlanId } from '@/lib/pricing';
+import { COMPANY_SIZES, getPlan, getPriceForDevices, formatINR, YEAR_OPTIONS, type PlanId } from '@/lib/pricing';
 
 type Step = 'account' | 'billing' | 'payment' | 'processing' | 'success' | 'failure';
-
-interface DurationOption {
-  years: number;
-  months: number;
-  label: string;
-  discountPercent: number;
-}
-
-const DURATION_OPTIONS: DurationOption[] = [
-  { years: 1, months: 12, label: '12 months (1 Year)', discountPercent: 0 },
-  { years: 2, months: 24, label: '24 months (2 Years)', discountPercent: 15 },
-  { years: 3, months: 36, label: '36 months (3 Years)', discountPercent: 25 },
-  { years: 4, months: 48, label: '48 months (4 Years)', discountPercent: 35 },
-];
 
 const TAX_RATE = 0.18;
 
@@ -37,10 +23,10 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const planId = (searchParams.get('plan') || 'endpoint-security') as PlanId;
   const devices = parseInt(searchParams.get('devices') || '5', 10);
+  const yearsParam = parseInt(searchParams.get('years') || '1', 10);
   const plan = getPlan(planId);
 
   const [step, setStep] = useState<Step>('account');
-  const [selectedYears, setSelectedYears] = useState<number>(3);
   const [sameAsCompany, setSameAsCompany] = useState(false);
   const [country, setCountry] = useState('in');
 
@@ -57,12 +43,11 @@ export default function CheckoutPage() {
   }
 
   const baseAnnualPrice = getPriceForDevices(plan, devices) ?? 0;
-  const selectedDuration = DURATION_OPTIONS.find((d) => d.years === selectedYears) || DURATION_OPTIONS[0];
+  const selectedDuration = YEAR_OPTIONS.find((d) => d.years === yearsParam) || YEAR_OPTIONS[0];
   const undiscountedTotal = baseAnnualPrice * selectedDuration.years;
   const discountAmount = Math.round(undiscountedTotal * (selectedDuration.discountPercent / 100));
   const subtotal = undiscountedTotal - discountAmount;
   const monthlyEquivalent = Math.round(subtotal / selectedDuration.months);
-  const originalMonthlyEquivalent = Math.round(baseAnnualPrice / 12);
   const tax = Math.round(subtotal * TAX_RATE);
   const total = subtotal + tax;
   const orderId = `TS-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -119,69 +104,37 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
             {/* Form area */}
             <div className="order-2 lg:order-1 space-y-6">
-              {/* Duration / Years Selection Card (only on checkout) */}
-              <div className="animate-fade-up space-y-5 rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-xs">
-                {/* Header with plan badge icon */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface border border-border/80">
-                    <ShieldCheck className="h-5 w-5 text-brand-orange" />
-                  </div>
-                  <div>
-                    <h2 className="font-display text-lg font-semibold text-foreground">{plan.name}</h2>
-                    <p className="text-xs text-muted-foreground">{devices} Protected Devices · Dedicated Enterprise Console</p>
-                  </div>
-                </div>
-
-                {/* Period Selector and Pricing */}
-                <div className="space-y-2 pt-1">
-                  <Label htmlFor="periodSelect" className="text-sm font-semibold text-foreground">Period</Label>
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="w-full sm:max-w-[270px]">
-                      <Select
-                        value={String(selectedYears)}
-                        onValueChange={(val) => setSelectedYears(Number(val))}
-                      >
-                        <SelectTrigger id="periodSelect" className="h-11 rounded-xl border-border bg-background px-3.5 text-sm font-medium">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DURATION_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.years} value={String(opt.years)} className="text-sm">
-                              <span className="font-medium">{opt.label}</span>
-                              {opt.discountPercent > 0 && (
-                                <span className="ml-2 text-xs font-semibold text-emerald-600">
-                                  ({opt.discountPercent}% off)
-                                </span>
-                              )}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+              {/* Plan & License Summary Card */}
+              <div className="animate-fade-up space-y-4 rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-xs">
+                {/* Header with plan badge icon and pricing overview */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface border border-border/80 shrink-0">
+                      <ShieldCheck className="h-5 w-5 text-brand-orange" />
                     </div>
+                    <div>
+                      <h2 className="font-display text-lg font-semibold text-foreground">{plan.name}</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {devices} Protected Devices · {selectedDuration.label}
+                      </p>
+                    </div>
+                  </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3.5">
-                      {discountAmount > 0 && (
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
-                          Save {formatINR(discountAmount)}
-                        </span>
-                      )}
-                      <div className="text-right">
-                        <div className="font-display text-xl font-bold tracking-tight text-foreground">
-                          {formatINR(monthlyEquivalent)}<span className="text-xs font-normal text-muted-foreground">/mo</span>
-                        </div>
-                        {discountAmount > 0 && (
-                          <div className="text-xs text-muted-foreground line-through">
-                            {formatINR(originalMonthlyEquivalent)}/mo
-                          </div>
-                        )}
+                  <div className="flex items-center gap-3 sm:text-right">
+                    {selectedDuration.discountPercent > 0 && (
+                      <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
+                        {selectedDuration.discountPercent}% Savings Applied
+                      </span>
+                    )}
+                    <div>
+                      <div className="font-display text-lg font-bold text-foreground">
+                        {formatINR(subtotal)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatINR(monthlyEquivalent)}/mo
                       </div>
                     </div>
                   </div>
-                  <p className="pt-1 text-xs text-muted-foreground">
-                    {selectedDuration.years > 1
-                      ? `Renews after ${selectedDuration.months} months at ${formatINR(monthlyEquivalent)}/mo for 12 months. Cancel anytime.`
-                      : 'Renews annually at standard rate. Cancel or change plan anytime.'}
-                  </p>
                 </div>
 
                 <div className="border-t border-border/70" />
