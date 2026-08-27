@@ -6,17 +6,17 @@ import { Button } from '@/components/ui/button';
 
 export function PricingHero() {
   return (
-    <section className="relative overflow-hidden border-b border-border/60">
+    <section id="hero" className="relative overflow-hidden border-b border-border/60">
       <div className="absolute inset-0 bg-grid bg-grid-fade opacity-50" />
       <div className="absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-orange/10 blur-[120px]" />
       <div className="absolute right-1/4 top-20 h-[300px] w-[400px] translate-x-1/2 rounded-full bg-brand-purple/10 blur-[120px]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 text-brand-orange" />
+          <p className="animate-fade-up inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+            <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Endpoint · Browser · SAP Data Security
-          </div>
+          </p>
 
           <h1 className="animate-fade-up stagger-1 mt-6 font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             Security That Scales{' '}

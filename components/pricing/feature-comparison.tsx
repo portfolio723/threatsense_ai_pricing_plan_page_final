@@ -12,7 +12,8 @@ export function FeatureComparison() {
     <section id="compare" className="scroll-mt-20 border-b border-border/60 bg-surface">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-brand-purple">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+            <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Compare Plans
           </p>
           <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">

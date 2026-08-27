@@ -10,6 +10,7 @@ import { ValueCards } from '@/components/pricing/value-cards';
 import { TrustStrip } from '@/components/pricing/trust-strip';
 import { FAQ } from '@/components/pricing/faq';
 import { ContactSalesDialog } from '@/components/pricing/contact-sales-dialog';
+import { StickyNavFooter } from '@/components/pricing/sticky-nav-footer';
 
 export default function Home() {
   const [salesOpen, setSalesOpen] = useState(false);
@@ -26,6 +27,7 @@ export default function Home() {
           <TrustStrip />
           <FAQ />
         </main>
+        <StickyNavFooter />
         <ContactSalesDialog open={salesOpen} onOpenChange={setSalesOpen} />
       </div>
     </PricingProvider>

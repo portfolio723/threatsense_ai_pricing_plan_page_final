@@ -54,7 +54,8 @@ export function ValueCards() {
     <section className="bg-background">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="inline-flex items-center rounded-full bg-brand-orange/10 px-4 py-1.5 text-sm font-medium text-brand-orange">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+            <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Our values
           </p>
           <h2 className="mt-5 font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
