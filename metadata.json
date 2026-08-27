@@ -1,0 +1,6 @@
+{
+  "name": "ThreatSenseAI Pricing",
+  "description": "Pricing, free trial, and checkout pages for ThreatSenseAI endpoint and data security solutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
