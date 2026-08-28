@@ -26,9 +26,8 @@ export function FeatureComparison() {
           <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Data Leak Prevention Packages
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance leading-relaxed">
-            Three cumulative packages covering the full exfiltration path: device, browser, SAP screen.
-            Each package includes everything in the one before it, on a single console and policy model.
+          <p className="mt-3 text-base text-muted-foreground text-balance">
+            Cumulative protection across device, browser, and SAP on a single unified console.
           </p>
         </div>
 

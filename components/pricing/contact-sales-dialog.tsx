@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { COMPANY_SIZES, SAP_ENVIRONMENTS } from '@/lib/pricing';
+import { SAP_ENVIRONMENTS } from '@/lib/pricing';
 
 interface ContactSalesDialogProps {
   open: boolean;
@@ -32,88 +32,89 @@ export function ContactSalesDialog({ open, onOpenChange }: ContactSalesDialogPro
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else onOpenChange(v); }}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto p-5 sm:p-6">
         {submitted ? (
-          <div className="flex flex-col items-center py-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-              <CheckCircle2 className="h-8 w-8 text-success" />
+          <div className="flex flex-col items-center py-6 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+              <CheckCircle2 className="h-7 w-7" />
             </div>
-            <h2 className="mt-4 font-display text-xl font-semibold">
-              Thanks — We&apos;ve Got Your Request
+            <h2 className="mt-3.5 font-display text-xl font-semibold">
+              Request Received
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              A ThreatSenseAI specialist will contact you shortly.
+            <p className="mt-1.5 text-sm text-muted-foreground max-w-sm">
+              Our enterprise security architect will reach out within 2 hours with customized architecture and pricing.
             </p>
-            <Button onClick={handleClose} className="mt-6">
-              Done
+            <Button onClick={handleClose} className="mt-5 bg-brand-purple text-white hover:bg-brand-purple-dark">
+              Close
             </Button>
           </div>
         ) : (
           <>
-            <DialogHeader>
-              <DialogTitle className="font-display text-xl">Let&apos;s Build Your Security Plan</DialogTitle>
-              <DialogDescription>
-                Tell us about your environment and our team will recommend the right deployment.
+            <DialogHeader className="pb-1">
+              <DialogTitle className="font-display text-xl font-semibold">Contact Enterprise Sales</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Get custom SAP deployment quotes, multi-year volume pricing, and architecture reviews.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cs-firstName">First Name</Label>
-                  <Input id="cs-firstName" required placeholder="Jane" />
+
+            <form onSubmit={handleSubmit} className="space-y-3 pt-1">
+              {/* Row 1: Full Name and Business Email side by side */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="cs-fullName" className="text-xs font-medium text-foreground">Full Name</Label>
+                  <Input id="cs-fullName" required placeholder="Jane Doe" className="h-9 text-sm" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cs-lastName">Last Name</Label>
-                  <Input id="cs-lastName" required placeholder="Doe" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="cs-email" className="text-xs font-medium text-foreground">Business Email</Label>
+                  <Input id="cs-email" type="email" required placeholder="jane@company.com" className="h-9 text-sm" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cs-email">Business Email</Label>
-                <Input id="cs-email" type="email" required placeholder="you@company.com" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cs-phone">Phone</Label>
-                <Input id="cs-phone" required placeholder="+91 98765 43210" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cs-org">Organization</Label>
-                <Input id="cs-org" required placeholder="Acme Corporation" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cs-designation">Designation</Label>
-                  <Input id="cs-designation" placeholder="IT Administrator" />
+
+              {/* Row 2: Phone Number and Organization side by side */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="cs-phone" className="text-xs font-medium text-foreground">Phone Number</Label>
+                  <Input id="cs-phone" required placeholder="+91 98765 43210" className="h-9 text-sm" />
                 </div>
-                <div className="space-y-2">
-                  <Label>Company Size</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="cs-org" className="text-xs font-medium text-foreground">Organization</Label>
+                  <Input id="cs-org" required placeholder="Acme Corporation" className="h-9 text-sm" />
+                </div>
+              </div>
+
+              {/* Row 3: Protected Devices and SAP Environment side by side */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="cs-devices" className="text-xs font-medium text-foreground">Estimated Devices</Label>
+                  <Input id="cs-devices" type="number" min={1} placeholder="250+" className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="cs-sap" className="text-xs font-medium text-foreground">SAP Environment</Label>
                   <Select>
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>
-                      {COMPANY_SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cs-devices">Number of Devices</Label>
-                  <Input id="cs-devices" type="number" min={1} placeholder="250" />
-                </div>
-                <div className="space-y-2">
-                  <Label>SAP Environment</Label>
-                  <Select>
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger id="cs-sap" className="h-9 text-sm">
+                      <SelectValue placeholder="Select environment" />
+                    </SelectTrigger>
                     <SelectContent>
                       {SAP_ENVIRONMENTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cs-message">Message</Label>
-                <Textarea id="cs-message" placeholder="Tell us about your requirements..." rows={3} />
+
+              {/* Row 4: Requirements Message (compact) */}
+              <div className="space-y-1.5">
+                <Label htmlFor="cs-message" className="text-xs font-medium text-foreground">
+                  Requirements / Notes <span className="font-normal text-muted-foreground">(Optional)</span>
+                </Label>
+                <Textarea
+                  id="cs-message"
+                  placeholder="Tell us about your compliance timeline or SAP landscape..."
+                  rows={2}
+                  className="text-sm resize-none min-h-[56px] py-1.5"
+                />
               </div>
-              <Button type="submit" className="w-full bg-brand-purple text-white hover:bg-brand-purple-dark">
+
+              <Button type="submit" size="default" className="w-full bg-brand-purple text-white hover:bg-brand-purple-dark mt-2 shadow-xs">
                 Talk to Sales
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

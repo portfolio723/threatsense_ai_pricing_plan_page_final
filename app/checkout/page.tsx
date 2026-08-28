@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, ArrowRight, Lock, CheckCircle2, XCircle, Loader2,
-  ShieldCheck, Download, FileText, HelpCircle, Plus, Sparkles, SlidersHorizontal,
+  Download, FileText, HelpCircle, Plus, Sparkles, SlidersHorizontal, ChevronDown,
 } from 'lucide-react';
 import { Navbar } from '@/components/pricing/navbar';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
-  COMPANY_SIZES,
   PLANS,
   DEVICE_OPTIONS,
   YEAR_OPTIONS,
@@ -26,11 +26,11 @@ import {
   type AddOn,
 } from '@/lib/pricing';
 
-type Step = 'account' | 'billing' | 'payment' | 'processing' | 'success' | 'failure';
+type Step = 'details' | 'payment' | 'processing' | 'success' | 'failure';
 
 const TAX_RATE = 0.18;
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialPlanId = (searchParams.get('plan') || 'endpoint-security') as PlanId;
@@ -42,9 +42,14 @@ export default function CheckoutPage() {
   const [selectedYears, setSelectedYears] = useState<number>(initialYears);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
 
-  const [step, setStep] = useState<Step>('account');
-  const [sameAsCompany, setSameAsCompany] = useState(false);
+  const [step, setStep] = useState<Step>('details');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [org, setOrg] = useState('');
   const [country, setCountry] = useState('in');
+  const [primaryOS, setPrimaryOS] = useState('windows');
+  const [gstin, setGstin] = useState('');
 
   const plan = getPlan(selectedPlanId) || PLANS[0];
   const isEnterprise = plan.salesOnly;
@@ -86,8 +91,7 @@ export default function CheckoutPage() {
   };
 
   const steps: { id: Step; label: string }[] = [
-    { id: 'account', label: 'Account' },
-    { id: 'billing', label: 'Billing' },
+    { id: 'details', label: 'Details & Billing' },
     { id: 'payment', label: 'Payment' },
   ];
   const currentStepIndex = steps.findIndex((s) => s.id === step);
@@ -125,188 +129,153 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {(step === 'account' || step === 'billing' || step === 'payment') && (
+        {(step === 'details' || step === 'payment') && (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
             {/* Form area */}
             <div className="order-2 lg:order-1 space-y-6">
-              {/* Plan & License Summary Card */}
-              <div className="animate-fade-up space-y-4 rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-xs">
-                {/* Header with plan badge icon and pricing overview */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface border border-border/80 shrink-0">
-                      <ShieldCheck className="h-6 w-6 text-brand-orange" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h2 className="font-display text-lg font-semibold text-foreground">{plan.name}</h2>
-                        {plan.recommended && (
-                          <span className="rounded-full bg-brand-purple/10 px-2 py-0.5 text-[10px] font-semibold text-brand-purple border border-brand-purple/20">
-                            Recommended
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {devices} Protected Devices · {selectedDuration.label}
-                        {activeAddOns.length > 0 && ` · +${activeAddOns.length} Add-on${activeAddOns.length > 1 ? 's' : ''}`}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 sm:text-right">
-                    {selectedDuration.discountPercent > 0 && (
-                      <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
-                        {selectedDuration.discountPercent}% Savings Applied
-                      </span>
-                    )}
-                    <div>
-                      <div className="font-display text-lg font-bold text-foreground">
-                        {formatINR(subtotal)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatINR(monthlyEquivalent)}/mo
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-border/70" />
-
-                {/* Inclusion reassurance */}
-                <div className="flex items-center gap-2 text-xs font-medium text-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>
-                    Your {devices} device deployment includes <strong className="font-semibold text-foreground">FREE 24/7 Security Incident Response</strong> &amp; Threat Telemetry SLA
-                  </span>
-                </div>
-              </div>
-
-              {step === 'account' && (
+              {/* Step 1: Simplified Account & Billing in One Step */}
+              {step === 'details' && (
                 <div className="animate-fade-up space-y-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
                   <div>
-                    <h2 className="font-display text-xl font-semibold">Your Details</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">Tell us about yourself and your organization.</p>
+                    <h2 className="font-display text-xl font-semibold">Account &amp; Billing Information</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Essential information required for license provisioning, 24/7 customer support, and tax invoices.
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" required placeholder="Jane" />
+
+                  <div className="space-y-4">
+                    {/* Primary Contact */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName">Full Name</Label>
+                        <Input
+                          id="fullName"
+                          required
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          placeholder="Jane Doe"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Work Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="jane@company.com"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          License key and console credentials sent here
+                        </p>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" required placeholder="Doe" />
+
+                    {/* Support & Organization Data */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Support Contact Number</Label>
+                        <Input
+                          id="phone"
+                          required
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="+91 98765 43210"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          For 24/7 emergency incident response &amp; escalation
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="org">Organization Name</Label>
+                        <Input
+                          id="org"
+                          required
+                          value={org}
+                          onChange={(e) => setOrg(e.target.value)}
+                          placeholder="Acme Corporation"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          Tenant name for cloud console and billing invoice
+                        </p>
+                      </div>
                     </div>
+
+                    {/* Environment & Location Data (Crucial for Customer Support & Future Improvements) */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="primaryOS">Primary Environment / OS</Label>
+                        <Select value={primaryOS} onValueChange={setPrimaryOS}>
+                          <SelectTrigger id="primaryOS">
+                            <SelectValue placeholder="Select primary OS" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="windows">Windows (Desktops &amp; Servers)</SelectItem>
+                            <SelectItem value="macos">macOS (Apple Silicon &amp; Intel)</SelectItem>
+                            <SelectItem value="linux">Linux (Ubuntu / RHEL / Debian)</SelectItem>
+                            <SelectItem value="hybrid">Multi-OS Hybrid Environment</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-muted-foreground">
+                          Helps support team pre-package your agent installers
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="country">Country / Billing Jurisdiction</Label>
+                        <Select value={country} onValueChange={setCountry}>
+                          <SelectTrigger id="country">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="in">India</SelectItem>
+                            <SelectItem value="us">United States</SelectItem>
+                            <SelectItem value="uk">United Kingdom</SelectItem>
+                            <SelectItem value="de">Germany</SelectItem>
+                            <SelectItem value="sg">Singapore</SelectItem>
+                            <SelectItem value="ae">UAE</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-muted-foreground">
+                          Used for tax invoices &amp; data residency compliance
+                        </p>
+                      </div>
+                    </div>
+
+                    {country === 'in' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="gstin">
+                          GSTIN <span className="font-normal text-muted-foreground">(Optional for B2B input tax credit)</span>
+                        </Label>
+                        <Input
+                          id="gstin"
+                          value={gstin}
+                          onChange={(e) => setGstin(e.target.value)}
+                          placeholder="22AAAAA0000A1Z5"
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Business Email</Label>
-                    <Input id="email" type="email" required placeholder="you@company.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Contact Number</Label>
-                    <Input id="phone" required placeholder="+91 98765 43210" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="designation">Designation</Label>
-                    <Input id="designation" placeholder="IT Administrator" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="org">Organization Name</Label>
-                    <Input id="org" required placeholder="Acme Corporation" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Company Size</Label>
-                    <Select>
-                      <SelectTrigger><SelectValue placeholder="Select company size" /></SelectTrigger>
-                      <SelectContent>
-                        {COMPANY_SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button size="lg" className="w-full" onClick={() => setStep('billing')}>
-                    Continue to Billing
+
+                  <Button
+                    size="lg"
+                    className="w-full bg-brand-orange text-white hover:bg-brand-orange-dark shadow-xs"
+                    onClick={() => setStep('payment')}
+                  >
+                    Continue to Payment
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               )}
 
-              {step === 'billing' && (
-                <div className="animate-fade-up space-y-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-                  <div>
-                    <h2 className="font-display text-xl font-semibold">Billing Information</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">Where should we send your invoice?</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox id="sameAsCompany" checked={sameAsCompany} onCheckedChange={(v) => setSameAsCompany(v === true)} />
-                    <Label htmlFor="sameAsCompany" className="text-sm font-normal cursor-pointer">
-                      Billing details are the same as company details
-                    </Label>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="billingOrg">Company / Organization</Label>
-                    <Input id="billingOrg" required placeholder="Acme Corporation" disabled={sameAsCompany} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="billingEmail">Billing Email</Label>
-                    <Input id="billingEmail" type="email" required placeholder="billing@company.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Billing Address</Label>
-                    <Input id="address" required placeholder="123 Business Park, Suite 400" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input id="city" required placeholder="Mumbai" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State</Label>
-                      <Input id="state" required placeholder="Maharashtra" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Country</Label>
-                      <Select value={country} onValueChange={setCountry}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="in">India</SelectItem>
-                          <SelectItem value="us">United States</SelectItem>
-                          <SelectItem value="uk">United Kingdom</SelectItem>
-                          <SelectItem value="de">Germany</SelectItem>
-                          <SelectItem value="sg">Singapore</SelectItem>
-                          <SelectItem value="ae">UAE</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="postal">Postal Code</Label>
-                      <Input id="postal" required placeholder="400001" />
-                    </div>
-                  </div>
-                  {country === 'in' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="gstin">GSTIN <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                      <Input id="gstin" placeholder="22AAAAA0000A1Z5" />
-                    </div>
-                  )}
-                  <div className="flex gap-3">
-                    <Button size="lg" variant="outline" onClick={() => setStep('account')}>
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back
-                    </Button>
-                    <Button size="lg" className="flex-1" onClick={() => setStep('payment')}>
-                      Continue to Payment
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
+              {/* Step 2: Payment */}
               {step === 'payment' && (
                 <form onSubmit={handlePay} className="animate-fade-up space-y-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
                   <div>
-                    <h2 className="font-display text-xl font-semibold">Secure Payment</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">Choose your preferred payment method.</p>
+                    <h2 className="font-display text-xl font-semibold">Select Payment Method</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">Choose your payment mode to complete purchase.</p>
                   </div>
 
                   <div className="space-y-3">
@@ -328,17 +297,17 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  <div className="rounded-lg bg-surface p-4">
+                  <div className="rounded-xl bg-surface p-4">
                     <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Lock className="h-3.5 w-3.5" />
-                      Your payment is processed securely. We do not store your card details.
+                      <Lock className="h-3.5 w-3.5 shrink-0" />
+                      Payments are encrypted via 256-bit SSL. License keys and access credentials are generated immediately.
                     </p>
                   </div>
 
                   <div className="flex gap-3">
-                    <Button type="button" size="lg" variant="outline" onClick={() => setStep('billing')}>
+                    <Button type="button" size="lg" variant="outline" onClick={() => setStep('details')}>
                       <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back
+                      Back to Details
                     </Button>
                     <Button type="submit" size="lg" className="flex-1 bg-brand-orange text-white hover:bg-brand-orange-dark">
                       Pay {formatINR(total)} Securely
@@ -346,7 +315,7 @@ export default function CheckoutPage() {
                     </Button>
                   </div>
                   <p className="text-center text-xs text-muted-foreground">
-                    You&apos;ll receive your invoice after successful payment.
+                    Official invoice will be delivered to {email ? email : 'your work email'}.
                   </p>
                 </form>
               )}
@@ -379,7 +348,6 @@ export default function CheckoutPage() {
                       {PLANS.filter((p) => !p.salesOnly).map((p) => (
                         <SelectItem key={p.id} value={p.id} className="text-sm">
                           <span className="font-medium">{p.name}</span>
-                          {p.recommended && <span className="ml-1.5 text-xs text-brand-purple font-semibold">(Recommended)</span>}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -431,51 +399,81 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Optional Add-Ons Section */}
-                <div className="space-y-2.5 rounded-xl border border-border/80 bg-surface/50 p-3.5">
+                {/* Optional Add-Ons Dropdown */}
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                    <Label htmlFor="addonsDropdown" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-brand-orange" />
                       Optional Add-Ons
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">Per device / yr</span>
+                    </Label>
+                    {activeAddOns.length > 0 && (
+                      <span className="text-xs font-semibold text-brand-orange tabular-nums">
+                        +{formatINR(addOnsSubtotal)}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="space-y-2 pt-1">
-                    {ADD_ONS.map((addon) => {
-                      const isChecked = selectedAddOnIds.includes(addon.id);
-                      const addonAnnualCost = addon.pricePerDeviceYear * devices;
-                      const addonTotalCost = addonAnnualCost * selectedDuration.years * (1 - selectedDuration.discountPercent / 100);
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        id="addonsDropdown"
+                        className="flex h-10 w-full items-center justify-between rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-border/80 focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <span className="truncate text-left">
+                          {activeAddOns.length === 0
+                            ? 'Select optional add-ons...'
+                            : `${activeAddOns.length} add-on${activeAddOns.length > 1 ? 's' : ''} selected (${activeAddOns.map((a) => a.name.split(' ')[0]).join(', ')})`}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[320px] sm:w-[380px] p-2 space-y-1.5 rounded-xl border border-border bg-popover shadow-lg"
+                      align="end"
+                      sideOffset={6}
+                    >
+                      <div className="px-2.5 py-1.5 border-b border-border/60 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-foreground">Available Security Modules</span>
+                        <span className="text-[10px] text-muted-foreground">{devices} dev · {selectedDuration.years} yr</span>
+                      </div>
+                      <div className="space-y-1 pt-1 max-h-[260px] overflow-y-auto">
+                        {ADD_ONS.map((addon) => {
+                          const isChecked = selectedAddOnIds.includes(addon.id);
+                          const addonAnnualCost = addon.pricePerDeviceYear * devices;
+                          const addonTotalCost = addonAnnualCost * selectedDuration.years * (1 - selectedDuration.discountPercent / 100);
 
-                      return (
-                        <label
-                          key={addon.id}
-                          className={`flex items-start gap-2.5 rounded-lg border p-2.5 transition-colors cursor-pointer ${
-                            isChecked
-                              ? 'border-brand-orange/40 bg-brand-orange/5'
-                              : 'border-border/60 bg-card hover:border-border'
-                          }`}
-                        >
-                          <Checkbox
-                            checked={isChecked}
-                            onCheckedChange={() => toggleAddOn(addon.id)}
-                            className="mt-0.5"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <p className="text-xs font-semibold text-foreground truncate">{addon.name}</p>
-                              <span className="text-xs font-semibold text-foreground whitespace-nowrap">
-                                +{formatINR(Math.round(addonTotalCost))}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
-                              {addon.shortDesc}
-                            </p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
+                          return (
+                            <label
+                              key={addon.id}
+                              className={`flex items-start gap-2.5 rounded-lg p-2.5 transition-colors cursor-pointer ${
+                                isChecked
+                                  ? 'bg-brand-orange/10 border border-brand-orange/30'
+                                  : 'hover:bg-accent/60 border border-transparent'
+                              }`}
+                            >
+                              <Checkbox
+                                checked={isChecked}
+                                onCheckedChange={() => toggleAddOn(addon.id)}
+                                className="mt-0.5"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-1">
+                                  <p className="text-xs font-semibold text-foreground truncate">{addon.name}</p>
+                                  <span className="text-xs font-semibold text-foreground whitespace-nowrap tabular-nums">
+                                    +{formatINR(Math.round(addonTotalCost))}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                                  {addon.shortDesc}
+                                </p>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Pricing Calculation Breakdown */}
@@ -609,3 +607,21 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-orange" />
+            <span>Loading checkout...</span>
+          </div>
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
+  );
+}
+

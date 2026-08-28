@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Star, ShieldCheck, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { Check, ArrowRight, Star, ShieldCheck, Sparkles, Loader2 } from 'lucide-react';
 import { Plan, getPriceCalculation, formatINR, SALES_THRESHOLD } from '@/lib/pricing';
 import { usePricing } from '@/lib/pricing-context';
 import { Button } from '@/components/ui/button';
@@ -18,11 +20,22 @@ interface PricingCardProps {
 export function PricingCard({ plan, onContactSales, index = 0, isInView = true }: PricingCardProps) {
   const { devices, years } = usePricing();
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
   const priceCalc = getPriceCalculation(plan, devices, years);
   const isSales = plan.salesOnly || devices >= SALES_THRESHOLD || priceCalc === null;
 
   const highlights = plan.features.slice(0, plan.highlightCount);
   const remaining = plan.features.length - plan.highlightCount;
+
+  const checkoutUrl = `/checkout?plan=${encodeURIComponent(plan.id)}&devices=${devices}&years=${years}`;
+
+  // Proactively prefetch checkout route and exact params for instant 0ms navigation
+  useEffect(() => {
+    if (!isSales) {
+      router.prefetch(checkoutUrl);
+      router.prefetch('/checkout');
+    }
+  }, [router, checkoutUrl, isSales]);
 
   const accentClasses =
     plan.accent === 'purple'
@@ -30,15 +43,6 @@ export function PricingCard({ plan, onContactSales, index = 0, isInView = true }
       : plan.accent === 'orange'
       ? 'border-brand-orange/40 hover:border-brand-orange hover:shadow-brand-orange/15'
       : 'border-border hover:border-muted-foreground/30';
-
-  const handleBuy = () => {
-    const params = new URLSearchParams({
-      plan: plan.id,
-      devices: String(devices),
-      years: String(years),
-    });
-    router.push(`/checkout?${params.toString()}`);
-  };
 
   return (
     <div
@@ -147,12 +151,25 @@ export function PricingCard({ plan, onContactSales, index = 0, isInView = true }
           </Button>
         ) : (
           <Button
-            onClick={handleBuy}
-            className="group/cta w-full bg-brand-orange text-white hover:bg-brand-orange-dark shadow-sm transition-all duration-200 hover:shadow-md"
+            asChild
+            className="group/cta w-full bg-brand-orange text-white hover:bg-brand-orange-dark shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer"
+            onClick={() => setIsNavigating(true)}
+            onMouseEnter={() => router.prefetch(checkoutUrl)}
           >
-            <span className="group-hover/cta:hidden">Buy Now</span>
-            <span className="hidden group-hover/cta:inline">Continue to Checkout</span>
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/cta:translate-x-0.5" />
+            <Link href={checkoutUrl} prefetch={true}>
+              {isNavigating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Opening Checkout...</span>
+                </>
+              ) : (
+                <>
+                  <span className="group-hover/cta:hidden">Buy Now</span>
+                  <span className="hidden group-hover/cta:inline">Continue to Checkout</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/cta:translate-x-0.5" />
+                </>
+              )}
+            </Link>
           </Button>
         )}
       </div>

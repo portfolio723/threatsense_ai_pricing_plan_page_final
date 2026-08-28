@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { FlickeringGrid } from '@/registry/magicui/flickering-grid';
 
 interface PricingHeroProps {
   onContactSales?: () => void;
@@ -34,11 +35,25 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
 
   return (
     <section id="hero" className="relative overflow-hidden border-b border-border/60">
-      {/* Parallax Background Grid */}
+      {/* Animated Flickering Grid with Light Orange and Purple Dots */}
       <div
-        className="absolute inset-0 bg-grid bg-grid-fade opacity-50 will-change-transform"
-        style={{ transform: `translateY(${scrollY * 0.15}px)` }}
-      />
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden will-change-transform"
+        style={{
+          transform: `translateY(${scrollY * 0.12}px)`,
+          WebkitMaskImage: 'radial-gradient(750px circle at center 42%, white 30%, transparent 85%)',
+          maskImage: 'radial-gradient(750px circle at center 42%, white 30%, transparent 85%)',
+        }}
+      >
+        <FlickeringGrid
+          className="absolute inset-0 h-full w-full"
+          squareSize={4}
+          gridGap={6}
+          colors={['#FB923C', '#C084FC']}
+          shape="circle"
+          maxOpacity={0.5}
+          flickerChance={0.1}
+        />
+      </div>
 
       {/* Parallax Glow Spheres */}
       <div
@@ -59,10 +74,10 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
         style={{ transform: `translateY(${scrollY * 0.08}px)` }}
       >
         <div className="mx-auto max-w-3xl text-center">
-          <p className="animate-fade-up inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+          <div className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-brand-orange/10 border border-brand-orange/20 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-brand-orange shadow-xs">
             <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
             Endpoint · Browser · SAP Data Security
-          </p>
+          </div>
 
           {/* Staggered Word-Revealing Headline */}
           <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance">
@@ -99,11 +114,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
             Protect endpoints, browsers, and SAP data with a security plan built around your organization.
           </p>
 
-          <p className="animate-fade-up stagger-4 mt-3 text-sm text-muted-foreground">
-            Choose your protection level, select your devices, and start securing your environment.
-          </p>
-
-          <div className="animate-fade-up stagger-5 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="animate-fade-up stagger-4 mt-8 sm:mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/#plans" onClick={handleExploreClick}>
               <Button size="lg" className="w-full bg-brand-orange text-white hover:bg-brand-orange-dark sm:w-auto shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
                 Explore Plans
