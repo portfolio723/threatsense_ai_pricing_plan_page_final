@@ -79,7 +79,7 @@ export function ValueCards() {
       <div ref={ref} className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div
           className={cn(
-            'mx-auto max-w-3xl text-center transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            'mx-auto max-w-3xl text-center transition-[opacity,transform] duration-700 ease-out-expo',
             isInView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           )}
         >
@@ -107,7 +107,7 @@ export function ValueCards() {
                 }}
                 className={cn(
                   'group relative min-h-[230px] overflow-hidden rounded-xl bg-surface px-7 py-8 outline-none',
-                  'transition-[opacity,transform,box-shadow,border-color] duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[transform,opacity]',
+                  'transition-[opacity,transform,box-shadow,border-color] duration-800 ease-out-expo will-change-[transform,opacity]',
                   isInView
                     ? 'translate-y-0 opacity-100 scale-100'
                     : 'translate-y-8 opacity-0 scale-[0.97]',

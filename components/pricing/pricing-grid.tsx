@@ -17,7 +17,7 @@ export function PricingGrid({ onContactSales }: { onContactSales?: () => void })
       <div ref={ref} className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
         <div
           className={cn(
-            'mx-auto mb-12 max-w-2xl text-center transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            'mx-auto mb-12 max-w-2xl text-center transition-[opacity,transform] duration-700 ease-out-expo',
             isInView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           )}
         >
@@ -36,7 +36,7 @@ export function PricingGrid({ onContactSales }: { onContactSales?: () => void })
         <div
           style={{ transitionDelay: isInView ? '80ms' : '0ms' }}
           className={cn(
-            'mb-12 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            'mb-12 transition-[opacity,transform] duration-700 ease-out-expo',
             isInView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           )}
         >

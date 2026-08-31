@@ -23,6 +23,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://threatsense.ai'),
   title: 'ThreatSenseAI Pricing | Endpoint, Browser & SAP Data Security',
   description:
     'Choose ThreatSenseAI security plans for endpoint, browser, and SAP data protection. Start a free trial or purchase an annual plan.',

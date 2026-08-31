@@ -131,19 +131,19 @@ export default function TrialPage() {
               <div className="space-y-4">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Your Organization</h2>
                 <div className="space-y-2">
-                  <Label htmlFor="designation">Designation</Label>
-                  <Input id="designation" placeholder="e.g. IT Administrator" />
+                  <Label htmlFor="designation">Designation / Role</Label>
+                  <Input id="designation" placeholder="e.g. IT Administrator / CISO" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="org">Organization Name</Label>
                   <Input id="org" required placeholder="Acme Corporation" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Company Size</Label>
+                  <Label>Company Size (Total Employees)</Label>
                   <Select>
                     <SelectTrigger><SelectValue placeholder="Select company size" /></SelectTrigger>
                     <SelectContent>
-                      {COMPANY_SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      {COMPANY_SIZES.map((s) => <SelectItem key={s} value={s}>{s} employees</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

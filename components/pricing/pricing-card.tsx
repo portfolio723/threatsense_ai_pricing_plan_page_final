@@ -51,7 +51,7 @@ export function PricingCard({ plan, onContactSales, index = 0, isInView = true }
       }}
       className={cn(
         'group relative flex flex-col rounded-2xl border-2 bg-card p-6',
-        'transition-[opacity,transform,box-shadow,border-color] duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[transform,opacity]',
+        'transition-[opacity,transform,box-shadow,border-color] duration-800 ease-out-expo will-change-[transform,opacity]',
         isInView
           ? 'translate-y-0 opacity-100 scale-100'
           : 'translate-y-8 opacity-0 scale-[0.97]',

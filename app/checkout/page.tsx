@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, ArrowRight, Lock, CheckCircle2, XCircle, Loader2,
-  Download, FileText, HelpCircle, Plus, Sparkles, SlidersHorizontal, ChevronDown,
+  Download, FileText, HelpCircle, Plus, ShieldPlus, SlidersHorizontal, ChevronDown,
 } from 'lucide-react';
 import { Navbar } from '@/components/pricing/navbar';
 import { Button } from '@/components/ui/button';
@@ -14,11 +14,13 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { BorderBeam } from '@/registry/magicui/border-beam';
 import {
   PLANS,
   DEVICE_OPTIONS,
   YEAR_OPTIONS,
   ADD_ONS,
+  COMPANY_SIZES,
   getPlan,
   getPriceForDevices,
   formatINR,
@@ -45,6 +47,8 @@ function CheckoutContent() {
   const [step, setStep] = useState<Step>('details');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [designation, setDesignation] = useState('');
+  const [companySize, setCompanySize] = useState('51-250');
   const [phone, setPhone] = useState('');
   const [org, setOrg] = useState('');
   const [country, setCountry] = useState('in');
@@ -102,10 +106,7 @@ function CheckoutContent() {
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Back to Pricing
-          </Link>
-          <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">Complete your purchase</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Complete your purchase</h1>
 
           {/* Step indicator */}
           {step !== 'processing' && step !== 'success' && step !== 'failure' && (
@@ -135,7 +136,7 @@ function CheckoutContent() {
             <div className="order-2 lg:order-1 space-y-6">
               {/* Step 1: Simplified Account & Billing in One Step */}
               {step === 'details' && (
-                <div className="animate-fade-up space-y-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
+                <div className="relative overflow-hidden animate-fade-up space-y-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
                   <div>
                     <h2 className="font-display text-xl font-semibold">Account &amp; Billing Information</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -172,8 +173,21 @@ function CheckoutContent() {
                       </div>
                     </div>
 
-                    {/* Support & Organization Data */}
+                    {/* Designation / Role & Support Phone */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="designation">Designation / Role</Label>
+                        <Input
+                          id="designation"
+                          required
+                          value={designation}
+                          onChange={(e) => setDesignation(e.target.value)}
+                          placeholder="e.g. IT Administrator / CISO"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          Role of primary license administrator
+                        </p>
+                      </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone">Support Contact Number</Label>
                         <Input
@@ -187,6 +201,10 @@ function CheckoutContent() {
                           For 24/7 emergency incident response &amp; escalation
                         </p>
                       </div>
+                    </div>
+
+                    {/* Organization & Company Size */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="org">Organization Name</Label>
                         <Input
@@ -198,6 +216,24 @@ function CheckoutContent() {
                         />
                         <p className="text-[11px] text-muted-foreground">
                           Tenant name for cloud console and billing invoice
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="companySize">Company Size (Total Employees)</Label>
+                        <Select value={companySize} onValueChange={setCompanySize}>
+                          <SelectTrigger id="companySize">
+                            <SelectValue placeholder="Select company size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COMPANY_SIZES.map((size) => (
+                              <SelectItem key={size} value={size}>
+                                {size} employees
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-muted-foreground">
+                          Total workforce size across the organization
                         </p>
                       </div>
                     </div>
@@ -267,6 +303,15 @@ function CheckoutContent() {
                     Continue to Payment
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
+
+                  {/* Animated Border Beam with Orange and Purple */}
+                  <BorderBeam
+                    duration={8}
+                    size={200}
+                    colorFrom="#FB923C"
+                    colorTo="#C084FC"
+                    borderWidth={2}
+                  />
                 </div>
               )}
 
@@ -329,7 +374,6 @@ function CheckoutContent() {
                     <SlidersHorizontal className="h-4 w-4 text-brand-orange" />
                     Order Summary &amp; Config
                   </h3>
-                  <span className="text-xs text-muted-foreground font-medium">Instant Update</span>
                 </div>
 
                 {/* Tier Selection Dropdown */}
@@ -403,7 +447,7 @@ function CheckoutContent() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="addonsDropdown" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-brand-orange" />
+                      <ShieldPlus className="h-3.5 w-3.5 text-brand-orange" />
                       Optional Add-Ons
                     </Label>
                     {activeAddOns.length > 0 && (
@@ -511,11 +555,8 @@ function CheckoutContent() {
                     <span className="font-medium tabular-nums">{formatINR(tax)}</span>
                   </div>
 
-                  <div className="flex items-baseline justify-between border-t border-border pt-3">
-                    <div>
-                      <span className="font-semibold text-foreground text-base">Total Due</span>
-                      <p className="text-[11px] text-muted-foreground">{formatINR(monthlyEquivalent)}/mo equivalent</p>
-                    </div>
+                  <div className="flex items-center justify-between border-t border-border pt-3">
+                    <span className="font-semibold text-foreground text-base">Total Due</span>
                     <span className="font-display text-2xl font-bold tabular-nums text-foreground">{formatINR(total)}</span>
                   </div>
                 </div>
@@ -552,6 +593,9 @@ function CheckoutContent() {
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">License Details</p>
               <div className="mt-2 space-y-1 text-sm">
                 <p><span className="text-muted-foreground">Plan:</span> {plan.name}</p>
+                {org && <p><span className="text-muted-foreground">Organization:</span> {org}</p>}
+                {designation && <p><span className="text-muted-foreground">Role / Designation:</span> {designation}</p>}
+                {companySize && <p><span className="text-muted-foreground">Company Size:</span> {companySize} employees</p>}
                 <p><span className="text-muted-foreground">Duration:</span> {selectedDuration.label}</p>
                 <p><span className="text-muted-foreground">Devices:</span> {devices}</p>
                 {activeAddOns.length > 0 && (
