@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FlickeringGrid } from '@/registry/magicui/flickering-grid';
+import bgImage from '@/assets/images/bg-1.png';
 
 interface PricingHeroProps {
   onContactSales?: () => void;
@@ -35,43 +36,22 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
 
   return (
     <section id="hero" className="relative overflow-hidden border-b border-border/60">
-      {/* Animated Flickering Grid with Light Orange and Purple Dots */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none overflow-hidden will-change-transform"
-        style={{
-          transform: `translateY(${scrollY * 0.12}px)`,
-          WebkitMaskImage: 'radial-gradient(750px circle at center 42%, white 30%, transparent 85%)',
-          maskImage: 'radial-gradient(750px circle at center 42%, white 30%, transparent 85%)',
-        }}
-      >
-        <FlickeringGrid
-          className="absolute inset-0 h-full w-full"
-          squareSize={4}
-          gridGap={6}
-          colors={['#FB923C', '#C084FC']}
-          shape="circle"
-          maxOpacity={0.5}
-          flickerChance={0.1}
+      {/* Hero Background Image */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+        <Image
+          src={bgImage}
+          alt="ThreatSenseAI Hero Background"
+          fill
+          priority
+          placeholder="blur"
+          className="object-cover object-center"
+          referrerPolicy="no-referrer"
         />
       </div>
 
-      {/* Parallax Glow Spheres */}
       <div
-        className="absolute left-1/2 top-0 h-[420px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-orange/15 blur-[120px] will-change-transform transition-transform duration-75"
-        style={{ transform: `translate(calc(-50% + ${scrollY * 0.05}px), calc(-50% + ${scrollY * 0.25}px))` }}
-      />
-      <div
-        className="absolute right-1/4 top-20 h-[320px] w-[420px] translate-x-1/2 rounded-full bg-brand-purple/15 blur-[120px] will-change-transform transition-transform duration-75"
-        style={{ transform: `translate(calc(50% - ${scrollY * 0.08}px), ${scrollY * 0.35}px)` }}
-      />
-      <div
-        className="absolute left-1/6 bottom-10 h-[240px] w-[300px] rounded-full bg-brand-orange/10 blur-[90px] will-change-transform transition-transform duration-75"
-        style={{ transform: `translateY(${-scrollY * 0.18}px)` }}
-      />
-
-      <div
-        className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40 will-change-transform"
-        style={{ transform: `translateY(${scrollY * 0.08}px)` }}
+        className="relative z-10 mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40 will-change-transform"
+        style={{ transform: `translateY(${scrollY * 0.06}px)` }}
       >
         <div className="mx-auto max-w-3xl text-center">
           <div className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-brand-orange/10 border border-brand-orange/20 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-brand-orange shadow-xs">
@@ -80,8 +60,8 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
           </div>
 
           {/* Staggered Word-Revealing Headline */}
-          <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance">
-            <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1">
+          <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance text-foreground">
+            <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1 text-foreground">
               {regularWords.map((word, idx) => (
                 <span key={word} className="inline-block overflow-hidden py-1">
                   <span
@@ -116,7 +96,10 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
 
           <div className="animate-fade-up stagger-4 mt-8 sm:mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/#plans" onClick={handleExploreClick}>
-              <Button size="lg" className="w-full bg-brand-orange text-white hover:bg-brand-orange-dark sm:w-auto shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+              <Button
+                size="lg"
+                className="w-full bg-brand-orange text-white hover:bg-brand-orange-dark sm:w-auto shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 font-semibold"
+              >
                 Explore Plans
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -126,13 +109,17 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
                 size="lg"
                 variant="outline"
                 onClick={onContactSales}
-                className="w-full sm:w-auto border-border/80 hover:bg-surface"
+                className="w-full sm:w-auto border-border/80 hover:bg-surface text-foreground font-semibold"
               >
                 Talk to Sales
               </Button>
             ) : (
               <Link href="/#plans" onClick={handleExploreClick}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-border/80 hover:bg-surface">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto border-border/80 hover:bg-surface text-foreground font-semibold"
+                >
                   Talk to Sales
                 </Button>
               </Link>
