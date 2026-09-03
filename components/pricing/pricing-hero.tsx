@@ -33,7 +33,10 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
   const accentWords = ['With', 'Your', 'Business'];
 
   return (
-    <section id="hero" className="relative overflow-hidden border-b border-border/60">
+    <section
+      id="hero"
+      className="relative flex min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] w-full flex-col items-center justify-center overflow-hidden border-b border-border/60"
+    >
       {/* Hero Background Video */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <video
@@ -51,8 +54,8 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
       </div>
 
       <div
-        className="relative z-10 mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40 will-change-transform"
-        style={{ transform: `translateY(${scrollY * 0.06}px)` }}
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8 will-change-transform"
+        style={{ transform: `translateY(${scrollY * 0.04}px)` }}
       >
         <div className="mx-auto max-w-3xl text-center">
           <div className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-brand-orange/10 border border-brand-orange/20 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-brand-orange shadow-xs">
@@ -61,7 +64,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
           </div>
 
           {/* Staggered Word-Revealing Headline */}
-          <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance text-foreground">
+          <h1 className="mt-4 sm:mt-6 font-display text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance text-foreground">
             <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1 text-foreground">
               {regularWords.map((word, idx) => (
                 <span key={word} className="inline-block overflow-hidden py-1">
@@ -91,12 +94,12 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
             </span>
           </h1>
 
-          <p className="animate-fade-up stagger-3 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground text-balance">
+          <p className="animate-fade-up stagger-3 mx-auto mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg lg:text-xl text-muted-foreground text-balance">
             Protect endpoints, browsers, and SAP data with a security plan built around your organization.
           </p>
 
-          <div className="animate-fade-up stagger-4 mt-8 sm:mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/#plans" onClick={handleExploreClick}>
+          <div className="animate-fade-up stagger-4 mt-6 sm:mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href="/#plans" onClick={handleExploreClick} className="w-full sm:w-auto">
               <Button
                 size="lg"
                 className="w-full bg-brand-orange text-white hover:bg-brand-orange-dark sm:w-auto shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 font-semibold"
@@ -115,7 +118,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
                 Talk to Sales
               </Button>
             ) : (
-              <Link href="/#plans" onClick={handleExploreClick}>
+              <Link href="/#plans" onClick={handleExploreClick} className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
@@ -127,7 +130,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
             )}
           </div>
 
-          <p className="animate-fade-up stagger-6 mt-6 text-xs text-muted-foreground">
+          <p className="animate-fade-up stagger-6 mt-4 sm:mt-6 text-xs text-muted-foreground">
             Annual plans only · Free trial available · No monthly commitment
           </p>
         </div>
