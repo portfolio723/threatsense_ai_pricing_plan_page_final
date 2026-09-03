@@ -43,10 +43,10 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
           playsInline
           preload="auto"
           disablePictureInPicture
-          poster="/assets/images/bg-video-poster.jpg"
+          poster="/assets/images/bg-2-video-poster.jpg"
           className="h-full w-full object-cover object-center"
         >
-          <source src="/assets/images/bg.mp4" type="video/mp4" />
+          <source src="/assets/images/bg-2.mp4" type="video/mp4" />
         </video>
       </div>
 
@@ -55,14 +55,14 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
         style={{ transform: `translateY(${scrollY * 0.06}px)` }}
       >
         <div className="mx-auto max-w-3xl text-center">
-          <div className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-neutral-100 shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-neutral-200 animate-pulse" />
+          <div className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-brand-orange/10 border border-brand-orange/20 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-brand-orange shadow-xs">
+            <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
             Endpoint · Browser · SAP Data Security
           </div>
 
           {/* Staggered Word-Revealing Headline */}
-          <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance text-white">
-            <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1 text-white">
+          <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-balance text-foreground">
+            <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1 text-foreground">
               {regularWords.map((word, idx) => (
                 <span key={word} className="inline-block overflow-hidden py-1">
                   <span
@@ -74,7 +74,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
                 </span>
               ))}
             </span>{' '}
-            <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1 font-accent text-white">
+            <span className="inline-flex flex-wrap justify-center gap-x-[0.3em] gap-y-1 font-accent text-brand-orange">
               {accentWords.map((word, idx) => (
                 <span key={word} className="inline-block overflow-hidden py-1">
                   <span
@@ -91,7 +91,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
             </span>
           </h1>
 
-          <p className="animate-fade-up stagger-3 mx-auto mt-6 max-w-2xl text-lg text-white/90 sm:text-xl font-normal text-balance">
+          <p className="animate-fade-up stagger-3 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground text-balance">
             Protect endpoints, browsers, and SAP data with a security plan built around your organization.
           </p>
 
@@ -110,7 +110,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
                 size="lg"
                 variant="outline"
                 onClick={onContactSales}
-                className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border-white/30 text-white backdrop-blur-xs font-semibold"
+                className="w-full sm:w-auto border-border/80 hover:bg-surface text-foreground font-semibold"
               >
                 Talk to Sales
               </Button>
@@ -119,7 +119,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border-white/30 text-white backdrop-blur-xs font-semibold"
+                  className="w-full sm:w-auto border-border/80 hover:bg-surface text-foreground font-semibold"
                 >
                   Talk to Sales
                 </Button>
@@ -127,7 +127,7 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
             )}
           </div>
 
-          <p className="animate-fade-up stagger-6 mt-6 text-xs text-white/80">
+          <p className="animate-fade-up stagger-6 mt-6 text-xs text-muted-foreground">
             Annual plans only · Free trial available · No monthly commitment
           </p>
         </div>
