@@ -43,6 +43,7 @@
     "@types/node": "20.6.2",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
+    "@types/three": "^0.185.4",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -66,6 +67,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.185.1",
     "typescript": "5.2.2",
     "vaul": "^0.9.9",
     "zod": "^3.23.8"
