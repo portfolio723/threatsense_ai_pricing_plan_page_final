@@ -46,10 +46,10 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
           playsInline
           preload="auto"
           disablePictureInPicture
-          poster="/assets/images/bg-2-video-poster.jpg"
+          poster="/assets/images/bg-3-video-poster.jpg"
           className="h-full w-full object-cover object-center"
         >
-          <source src="/assets/images/bg-2.mp4" type="video/mp4" />
+          <source src="/assets/images/bg-3.mp4" type="video/mp4" />
         </video>
       </div>
 
