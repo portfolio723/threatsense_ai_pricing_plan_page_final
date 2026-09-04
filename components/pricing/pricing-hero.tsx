@@ -58,24 +58,24 @@ export function PricingHero({ onContactSales }: PricingHeroProps = {}) {
       }}
     >
       {/* Background LaserFlow (Shifted slightly to the right of the dashboard) */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none translate-x-[4%] sm:translate-x-[7%] lg:translate-x-[10%]">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <LaserFlow
-          horizontalBeamOffset={0.36}
-          verticalBeamOffset={0.0}
+          horizontalBeamOffset={0.22}
+          verticalBeamOffset={-0.08}
           color="#FF6B00"
           backgroundColor="#FFFFFF"
           wispDensity={1.5}
-          flowSpeed={0.8}
+          flowSpeed={0.85}
           verticalSizing={2.4}
-          horizontalSizing={0.55}
-          fogIntensity={0.65}
+          horizontalSizing={0.65}
+          fogIntensity={0.7}
           fogScale={0.35}
-          wispSpeed={20.0}
-          wispIntensity={7.0}
-          flowStrength={0.5}
+          wispSpeed={22.0}
+          wispIntensity={7.5}
+          flowStrength={0.55}
           decay={1.2}
           falloffStart={1.3}
-          fogFallSpeed={0.85}
+          fogFallSpeed={0.9}
         />
       </div>
 

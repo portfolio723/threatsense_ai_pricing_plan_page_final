@@ -99,8 +99,8 @@ uniform float uFade;
 #define HFOG_Y_SOFT 60.0
 
 // Beam extents and edge masking
-#define EDGE_X0 0.22
-#define EDGE_X1 0.995
+#define EDGE_X0 0.70
+#define EDGE_X1 0.999
 #define EDGE_X_GAMMA 1.25
 #define EDGE_LUMA_T0 0.0
 #define EDGE_LUMA_T1 2.0
@@ -228,25 +228,29 @@ void mainImage(out vec4 fc,in vec2 frag){
     float eM=mix(xF,1.0,hi);
 
     if (uIsLight > 0.5) {
-        // High-contrast, rich orange liquid flow on white background
-        float totalFlow = (LF * 1.5 + w * 1.8) * eM * uFade;
-        float mask = clamp(totalFlow, 0.0, 1.0);
+        // High-contrast, rich radiant orange liquid flow on white/light background
+        float flowVal = (LF * 2.8 + max(0.0, w) * 3.6) * eM;
+        // Non-linear perceptual scaling so the fluid stream is unmistakably clear, saturated, and rich
+        float vis = clamp(pow(max(0.0, flowVal), 0.58) * 1.75 * uFade, 0.0, 1.0);
         
-        vec3 outerGlow = mix(uBgColor, vec3(1.0, 0.65, 0.30), 0.85);
-        vec3 midLiquid = uColor;
-        vec3 coreLiquid = vec3(0.92, 0.20, 0.0);
+        vec3 deepOrange = vec3(0.92, 0.22, 0.0);   // Intense laser core #EB3800
+        vec3 brightOrange = uColor;                // Saturated pure orange #FF6B00
+        vec3 warmAmber = vec3(1.0, 0.62, 0.15);    // Radiant amber fluid body
+        vec3 softGlow = vec3(1.0, 0.82, 0.50);     // Outer volumetric aura
         
-        vec3 liquidColor;
-        if (mask < 0.35) {
-            liquidColor = mix(uBgColor, outerGlow, mask / 0.35);
-        } else if (mask < 0.75) {
-            liquidColor = mix(outerGlow, midLiquid, (mask - 0.35) / 0.4);
+        vec3 liquidCol;
+        if (vis < 0.3) {
+            liquidCol = mix(softGlow, warmAmber, vis / 0.3);
+        } else if (vis < 0.7) {
+            liquidCol = mix(warmAmber, brightOrange, (vis - 0.3) / 0.4);
         } else {
-            liquidColor = mix(midLiquid, coreLiquid, (mask - 0.75) / 0.25);
+            liquidCol = mix(brightOrange, deepOrange, (vis - 0.7) / 0.3);
         }
         
-        liquidColor = mix(liquidColor, coreLiquid, clamp(w * 0.9, 0.0, 0.5));
-        vec3 col = mix(uBgColor, liquidColor, mask) + dith * 0.3;
+        // Add streak highlights from wisps
+        liquidCol = mix(liquidCol, vec3(1.0, 0.95, 0.85), clamp(w * 2.0 * uFade, 0.0, 0.6));
+        
+        vec3 col = mix(uBgColor, liquidCol, vis) + dith * 0.2;
         fc = vec4(col, 1.0);
     } else {
         float tone=g(LF+w);
@@ -462,6 +466,9 @@ export const LaserFlow = ({
     };
 
     setSizeNow();
+    const t1 = setTimeout(setSizeNow, 50);
+    const t2 = setTimeout(setSizeNow, 200);
+    const t3 = setTimeout(setSizeNow, 500);
     const ro = new ResizeObserver(scheduleResize);
     ro.observe(mount);
 
@@ -516,9 +523,18 @@ export const LaserFlow = ({
       prevTime = t;
 
       uniforms.iTime.value = t;
-      uniforms.uFlowTime.value = t;
-      uniforms.uFogTime.value = t;
-      uniforms.uFade.value = 1.0;
+      // Pre-seed flow time so turbulence is already active and looping immediately
+      uniforms.uFlowTime.value = 12.0 + t;
+      uniforms.uFogTime.value = 12.0 + t;
+
+      // Ensure the flow appears promptly within 3-4 seconds of the section opening
+      if (t < 3.2) {
+        const p = Math.min(1.0, t / 3.0);
+        const ease = 0.35 + 0.65 * (1.0 - Math.pow(1.0 - p, 2.5));
+        uniforms.uFade.value = ease;
+      } else {
+        uniforms.uFade.value = 1.0;
+      }
 
       const tau = Math.max(1e-3, mouseSmoothTime);
       const alpha = 1 - Math.exp(-Math.min(0.05, dt) / tau);
@@ -532,6 +548,9 @@ export const LaserFlow = ({
 
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       ro.disconnect();
       io.disconnect();
       document.removeEventListener('visibilitychange', onVis);
